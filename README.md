@@ -1,6 +1,6 @@
-# DocExtract: AI-Powered Medical Document Intelligence System
+# DocExtract: AI-Powered Document Text Extraction System
 
-DocExtract is a production-quality, open-source medical document intelligence system that extracts, cleans, and presents text from medical prescriptions, laboratory reports, and invoices. 
+DocExtract is a production-quality, open-source document intelligence system that extracts, cleans, and presents text from PDFs, scanned documents, and images.
 
 This repository contains both the **FastAPI Python backend** (with hardware-accelerated PaddleOCR) and the **React + TypeScript frontend** (using TailwindCSS and Framer Motion).
 
@@ -13,8 +13,7 @@ This repository contains both the **FastAPI Python backend** (with hardware-acce
 The application is structured into two main components:
 1. **`backendPY/`**: FastAPI REST API coordinating document extraction.
    * **PyMuPDF (`fitz`)**: Parses digital PDFs instantly and renders pages into preview PNGs.
-   * **PaddleOCR (v3.2.2)**: Performs high-accuracy optical character recognition on scanned PDFs or raw images.
-   * **Medical Parser**: Regex & fuzzy-rule extraction engine identifying patient demographics, test parameters, and medicine dosages.
+   * **PaddleOCR (v3.2.2)**: Performs high-accuracy optical character recognition (OCR) on scanned PDFs or raw images.
 2. **`frontend/`**: Interactive user interface.
    * **React + Vite + TypeScript**: Hot-reloading, component-driven client-side application.
    * **Framer Motion**: Smooth micro-animations and visual transitions.
