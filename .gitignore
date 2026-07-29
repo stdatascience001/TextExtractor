@@ -1,0 +1,26 @@
+# Virtual environment
+backendPY/venv/
+venv/
+.venv/
+env/
+
+# Python caching
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Node.js
+**/node_modules/
+**/dist/
+**/.vite/
+**/*.local
+.env
+.env.*
+
+# Uploads and temporary data
+backendPY/uploads/
+uploads/
+**/scratch/
+**/.crdownload
+**/*.tmp
