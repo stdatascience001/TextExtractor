@@ -7,3 +7,10 @@ paddleocr>=2.7.0
 Pillow==10.2.0
 opencv-python-headless==4.9.0.80
 numpy<2
+pydantic-settings==2.14.2
+sqlalchemy==2.0.51
+alembic==1.18.5
+asyncpg==0.31.0
+greenlet==3.5.4
+pyjwt==2.13.0
+bcrypt==5.0.0

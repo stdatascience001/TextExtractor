@@ -232,6 +232,7 @@
 import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, FileText, Image, X } from "lucide-react";
+import { Tooltip } from "./ui/Tooltip";
 
 export interface SelectedDocument {
   file: File;
@@ -361,12 +362,14 @@ export function FileDropzone({
                 </div>
 
                 {!isLoading && (
-                  <button
-                    onClick={onClear}
-                    className="p-2 rounded-lg hover:bg-muted transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <Tooltip title="Clear File" description="Remove the selected file and upload a different one." placement="bottom">
+                    <button
+                      onClick={onClear}
+                      className="p-2 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </Tooltip>
                 )}
               </div>
 
@@ -410,6 +413,7 @@ export function FileDropzone({
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png"
                 onChange={handleFileInput}
+                title=""
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
 

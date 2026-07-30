@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
     watch: {
-      ignored: ["**/*.crdownload"],
+      ignored: ["**/public/**", "**/*.crdownload", "**/*.tmp"],
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
