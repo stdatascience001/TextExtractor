@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { FileDropzone, type SelectedDocument } from "@/components/FileDropzone";
 import { DocumentViewer } from "@/components/DocumentViewer";
@@ -12,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LogoutButton } from "@/components/LogoutButton";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
+import { SidebarLayout } from "@/shared/layouts/SidebarLayout";
 import { Tooltip } from "@/components/ui/Tooltip";
 
 const Index = () => {
@@ -26,6 +28,20 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Enforce project workspace entry point validation
+  useEffect(() => {
+    if (isAuthenticated) {
+      const activeProj = localStorage.getItem("activeProjectId");
+      if (!activeProj) {
+        toast({
+          title: "Project Context Required",
+          description: "Please select or create a project context to begin document parsing.",
+        });
+        navigate("/projects");
+      }
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleSave = async () => {
     if (!document) return;
 
@@ -36,6 +52,13 @@ const Index = () => {
       return;
     }
 
+    const activeProjectId = localStorage.getItem("activeProjectId");
+    if (!activeProjectId) {
+      toast({ title: "Project Context Missing", description: "Please select a project to save this document.", variant: "destructive" });
+      navigate("/projects");
+      return;
+    }
+
     setIsSaving(true);
     try {
       await api.saveDocument({
@@ -43,7 +66,8 @@ const Index = () => {
         file_type: document.fileType,
         file_path: document.fileUrl,
         full_text: document.fullText || "",
-        structured_data: document.structuredData || null
+        structured_data: document.structuredData || null,
+        project_id: activeProjectId
       });
       toast({ title: "Success", description: "Document saved successfully!" });
     } catch (err: any) {
@@ -54,6 +78,7 @@ const Index = () => {
   };
 
   const handleFileSelect = useCallback(async (selectedDoc: SelectedDocument) => {
+
     setSelectedFile(selectedDoc.file);
     setSelectedDocument(selectedDoc);
     setError(null);
@@ -63,24 +88,21 @@ const Index = () => {
 
     try {
       const result = await uploadDocument(selectedDoc.file);
-
-      // Check if image/document has no readable text
-      const hasText = result.pages.some(page => page.text && page.text.trim().length > 0);
-      if (!hasText) {
-        setError("Unable to extract text from this image. Please ensure the image contains readable text.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Use the results directly from the backend
-      setDocument(result);
+      
+      toast({
+        title: "Upload Accepted",
+        description: "Document processing queued in the background. Redirecting to document view page...",
+      });
+      
+      setTimeout(() => {
+        navigate(`/documents/${result.document_id}`);
+      }, 1500);
     } catch (err) {
-
       setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [navigate, toast]);
 
   const handleClear = useCallback(() => {
     setSelectedFile(null);
@@ -96,14 +118,16 @@ const Index = () => {
   }, [selectedDocument, handleFileSelect]);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-        className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50"
-      >
+    <SidebarLayout>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        {!isAuthenticated && (
+          <motion.header
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50"
+          >
         <div className="max-w-[115rem] mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
             <motion.div
@@ -152,6 +176,7 @@ const Index = () => {
           </div>
         </div>
       </motion.header>
+      )}
 
       {/* Main content */}
       <main className="max-w-[115rem] mx-auto px-6 py-8">
@@ -281,7 +306,8 @@ const Index = () => {
           )}
         </AnimatePresence>
       </main>
-    </div>
+      </div>
+    </SidebarLayout>
   );
 };
 

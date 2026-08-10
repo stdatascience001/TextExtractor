@@ -233,12 +233,13 @@ import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, FileText, Image, X } from "lucide-react";
 import { Tooltip } from "./ui/Tooltip";
+import { toast } from "sonner";
 
 export interface SelectedDocument {
   file: File;
   fileUrl: string;
   fileName: string;
-  fileType: "pdf" | "image";
+  fileType: "pdf" | "image" | "docx" | "text";
 }
 
 interface FileDropzoneProps {
@@ -252,6 +253,9 @@ const acceptedTypes = {
   "application/pdf": [".pdf"],
   "image/jpeg": [".jpg", ".jpeg"],
   "image/png": [".png"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+  "text/plain": [".txt"],
+  "text/csv": [".csv"],
 };
 
 export function FileDropzone({
@@ -263,15 +267,31 @@ export function FileDropzone({
   const [isDragging, setIsDragging] = useState(false);
 
   // ✅ Create previewable document
-  const createDocument = (file: File): SelectedDocument => ({
-    file,
-    fileUrl: URL.createObjectURL(file), // 🔥 REQUIRED FOR IMAGE PREVIEW
-    fileName: file.name,
-    fileType: file.type === "application/pdf" ? "pdf" : "image",
-  });
+  const createDocument = (file: File): SelectedDocument => {
+    const ext = file.name.split('.').pop()?.toLowerCase() || "";
+    let type: "pdf" | "image" | "docx" | "text" = "pdf";
+    if (file.type.startsWith("image/") || ["jpg", "jpeg", "png"].includes(ext)) {
+      type = "image";
+    } else if (file.type === "application/pdf" || ext === "pdf") {
+      type = "pdf";
+    } else if (ext === "docx") {
+      type = "docx";
+    } else {
+      type = "text";
+    }
+    return {
+      file,
+      fileUrl: URL.createObjectURL(file),
+      fileName: file.name,
+      fileType: type,
+    };
+  };
 
-  const isValidFile = (file: File) =>
-    Object.keys(acceptedTypes).includes(file.type);
+  const isValidFile = (file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const validExtensions = ["pdf", "jpg", "jpeg", "png", "docx", "txt", "csv"];
+    return Object.keys(acceptedTypes).includes(file.type) || (ext && validExtensions.includes(ext));
+  };
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -299,8 +319,14 @@ export function FileDropzone({
       setIsDragging(false);
 
       const file = e.dataTransfer.files?.[0];
-      if (file && isValidFile(file)) {
-        onFileSelect(createDocument(file));
+      if (file) {
+        if (isValidFile(file)) {
+          onFileSelect(createDocument(file));
+        } else {
+          toast.error("Unsupported file format", {
+            description: "Please upload a PDF, JPG, PNG, DOCX, TXT, or CSV file."
+          });
+        }
       }
     },
     [onFileSelect]
@@ -309,19 +335,29 @@ export function FileDropzone({
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (file && isValidFile(file)) {
-        onFileSelect(createDocument(file));
+      if (file) {
+        if (isValidFile(file)) {
+          onFileSelect(createDocument(file));
+        } else {
+          toast.error("Unsupported file format", {
+            description: "Please upload a PDF, JPG, PNG, DOCX, TXT, or CSV file."
+          });
+        }
       }
     },
     [onFileSelect]
   );
 
-  const getFileIcon = (file: File) =>
-    file.type === "application/pdf" ? (
-      <FileText className="w-8 h-8" />
-    ) : (
-      <Image className="w-8 h-8" />
-    );
+  const getFileIcon = (file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (file.type === "application/pdf" || ext === "pdf") {
+      return <FileText className="w-8 h-8" />;
+    }
+    if (ext === "docx" || ext === "txt" || ext === "csv") {
+      return <FileText className="w-8 h-8 text-blue-500" />;
+    }
+    return <Image className="w-8 h-8" />;
+  };
 
   return (
     <motion.div
@@ -411,7 +447,7 @@ export function FileDropzone({
             >
               <input
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
+                accept=".pdf,.jpg,.jpeg,.png,.docx,.txt,.csv"
                 onChange={handleFileInput}
                 title=""
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -435,7 +471,7 @@ export function FileDropzone({
                     : "Drag & drop your document"}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  or click to browse • PDF, JPG, PNG
+                  or click to browse • PDF, JPG, PNG, DOCX, TXT, CSV
                 </p>
               </div>
             </motion.label>

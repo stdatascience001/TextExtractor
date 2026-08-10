@@ -6,8 +6,10 @@ from typing import AsyncGenerator
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=True if settings.APP_ENV == "development" else False,
-    future=True
+    future=True,
+    connect_args={"timeout": 5.0}
 )
+
 
 # Async session maker
 SessionLocal = async_sessionmaker(

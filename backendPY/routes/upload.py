@@ -1,21 +1,32 @@
 import os
 import uuid
-from fastapi import APIRouter, UploadFile, File
+from typing import Optional
+from fastapi import APIRouter, UploadFile, File, Form, Depends, BackgroundTasks
+from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+from database.database import get_db
+from models.models import User, Document, ProjectMember, Project
+from auth.dependencies import get_current_user
 from core.config import settings
 from core.exceptions import APIException
 from core.logging import logger
 from utils.validation import validate_file
 
-from services.pdf_extractor import extract_pdf_text
-from services.ocr_service import extract_text_from_image
-from services.medical_parser import parse_medical_report
-from schemas.upload import DocumentUploadResponseSchema
+from services.orchestrator import run_orchestration_pipeline_with_retries
 
 router = APIRouter()
 
-@router.post("/upload", response_model=DocumentUploadResponseSchema)
-async def upload_file(file: UploadFile = File(...)):
-    logger.info(f"--- Received upload: {file.filename} ---")
+@router.post("/upload", status_code=202)
+async def upload_file(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    project_id: Optional[uuid.UUID] = Form(None),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    logger.info(f"--- Received upload: {file.filename} for user {current_user.id} ---")
     ext = validate_file(file)
 
     contents = await file.read()
@@ -28,41 +39,77 @@ async def upload_file(file: UploadFile = File(...)):
     file_id = f"{uuid.uuid4()}.{ext}"
     file_path = os.path.join(settings.UPLOAD_DIR, file_id)
 
+    # Write file to disk
     with open(file_path, "wb") as f:
         f.write(contents)
 
-    try:
-        if ext == "pdf":
-            pages = extract_pdf_text(file_path)
-            file_type = "pdf"
-        else:
-            text = extract_text_from_image(file_path)
-            pages = [{
-                "pageNumber": 1, 
-                "text": text,
-                "imageUrl": f"/files/{file_id}"
-            }]
-            file_type = "image"
+    # Resolve file type mapping
+    if ext == "pdf":
+        file_type = "pdf"
+    elif ext in ("jpg", "jpeg", "png"):
+        file_type = "image"
+    elif ext == "docx":
+        file_type = "docx"
+    elif ext in ("txt", "csv"):
+        file_type = "text"
+    else:
+        file_type = "unknown"
 
-        full_text = "\n".join([p["text"] for p in pages])
-        logger.debug(f"Full text extracted (first 200 chars):\n{full_text[:200]}...")
-        structured_data = parse_medical_report(full_text)
+    # Resolve project context
+    target_project_id = project_id
+    if not target_project_id:
+        stmt = select(ProjectMember.project_id).where(ProjectMember.user_id == current_user.id).limit(1)
+        res = await db.execute(stmt)
+        target_project_id = res.scalar()
 
-    except Exception as e:
-        logger.exception(f"Error processing file {file.filename}")
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        raise APIException(
-            status_code=500,
-            detail=str(e)
-        )
+        if not target_project_id:
+            # Create a default workspace if none exists
+            new_project = Project(
+                id=uuid.uuid4(),
+                name=f"{current_user.username}'s Personal Workspace",
+                description="Default workspace created automatically during document upload."
+            )
+            db.add(new_project)
+            
+            member = ProjectMember(
+                project_id=new_project.id,
+                user_id=current_user.id,
+                role="owner"
+            )
+            db.add(member)
+            await db.flush()
+            target_project_id = new_project.id
 
-    return {
-        "fileType": file_type,
-        "fileName": file.filename,
-        "fileUrl": f"/files/{file_id}",
-        "totalPages": len(pages),
-        "pages": pages,
-        "structuredData": structured_data,
-        "fullText": full_text
-    }
+    # Create document record
+    doc = Document(
+        project_id=target_project_id,
+        user_id=current_user.id,
+        file_name=file.filename,
+        file_type=file_type,
+        file_path=f"/files/{file_id}",
+        status="uploaded"
+    )
+    db.add(doc)
+    await db.commit()
+    await db.refresh(doc)
+
+    logger.info(f"Document registered in database with ID: {doc.id}. Queueing orchestration pipeline.")
+
+    # Queue background task
+    background_tasks.add_task(
+        run_orchestration_pipeline_with_retries,
+        db,
+        doc.id,
+        file_path
+    )
+
+    return JSONResponse(
+        status_code=202,
+        content={
+            "status": "accepted",
+            "message": "Document uploaded and processing queued successfully.",
+            "document_id": str(doc.id),
+            "file_name": doc.file_name,
+            "project_id": str(doc.project_id)
+        }
+    )

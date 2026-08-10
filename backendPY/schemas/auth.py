@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
+from datetime import datetime
 import re
 
 class RegisterRequest(BaseModel):
@@ -45,7 +46,7 @@ class UserResponse(BaseModel):
     id: str
     username: str
     email: str
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True

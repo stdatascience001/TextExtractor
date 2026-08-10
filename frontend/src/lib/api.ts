@@ -1,4 +1,22 @@
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://127.0.0.1:8000';
+
+// Helper: fetch with a timeout so requests don't hang forever
+// when the backend is unreachable or restarting
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 10000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out — is the backend server running?');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export const getAuthHeaders = () => {
   const token = localStorage.getItem("accessToken");
@@ -8,7 +26,7 @@ export const getAuthHeaders = () => {
 export const api = {
   // Auth endpoints
   async register(data: any) {
-    const res = await fetch(`${API_URL}/auth/register`, {
+    const res = await fetchWithTimeout(`${API_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -21,7 +39,7 @@ export const api = {
   },
 
   async login(data: any) {
-    const res = await fetch(`${API_URL}/auth/login`, {
+    const res = await fetchWithTimeout(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -34,16 +52,16 @@ export const api = {
   },
 
   async getMe() {
-    const res = await fetch(`${API_URL}/auth/me`, {
+    const res = await fetchWithTimeout(`${API_URL}/auth/me`, {
       headers: getAuthHeaders(),
-    });
+    }, 5000); // shorter timeout for session check
     if (!res.ok) throw new Error("Not authenticated");
     return res.json();
   },
 
   // Document endpoints
   async saveDocument(data: any) {
-    const res = await fetch(`${API_URL}/documents/save`, {
+    const res = await fetchWithTimeout(`${API_URL}/documents/save`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,6 +80,7 @@ export const api = {
     skip: number = 0, 
     limit: number = 20,
     query?: string,
+    projectId?: string,
     startDate?: string,
     endDate?: string,
     sortBy: string = "created_at",
@@ -75,10 +94,11 @@ export const api = {
     });
 
     if (query) params.append("query", query);
+    if (projectId) params.append("project_id", projectId);
     if (startDate) params.append("start_date", startDate);
     if (endDate) params.append("end_date", endDate);
 
-    const res = await fetch(`${API_URL}/documents/?${params.toString()}`, {
+    const res = await fetchWithTimeout(`${API_URL}/documents/?${params.toString()}`, {
       headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error("Failed to fetch documents");
@@ -86,7 +106,7 @@ export const api = {
   },
 
   async getDocument(id: string) {
-    const res = await fetch(`${API_URL}/documents/${id}`, {
+    const res = await fetchWithTimeout(`${API_URL}/documents/${id}`, {
       headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error("Failed to fetch document");
@@ -94,7 +114,7 @@ export const api = {
   },
 
   async deleteDocument(id: string) {
-    const res = await fetch(`${API_URL}/documents/${id}`, {
+    const res = await fetchWithTimeout(`${API_URL}/documents/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
@@ -103,7 +123,7 @@ export const api = {
   },
 
   async getProfile() {
-    const res = await fetch(`${API_URL}/auth/profile`, {
+    const res = await fetchWithTimeout(`${API_URL}/auth/profile`, {
       headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error("Failed to fetch profile");
@@ -111,7 +131,7 @@ export const api = {
   },
 
   async updateUsername(username: string) {
-    const res = await fetch(`${API_URL}/auth/username`, {
+    const res = await fetchWithTimeout(`${API_URL}/auth/username`, {
       method: "PUT",
       headers: {
         ...getAuthHeaders(),
@@ -127,7 +147,7 @@ export const api = {
   },
 
   async changePassword(current_password: string, new_password: string) {
-    const res = await fetch(`${API_URL}/auth/password`, {
+    const res = await fetchWithTimeout(`${API_URL}/auth/password`, {
       method: "PUT",
       headers: {
         ...getAuthHeaders(),
@@ -143,7 +163,7 @@ export const api = {
   },
 
   async deleteAccount() {
-    const res = await fetch(`${API_URL}/auth/me`, {
+    const res = await fetchWithTimeout(`${API_URL}/auth/me`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
@@ -155,7 +175,7 @@ export const api = {
   },
 
   async exportDocument(id: string, format: "text" | "json" | "csv") {
-    const res = await fetch(`${API_URL}/documents/${id}/export?format=${format}`, {
+    const res = await fetchWithTimeout(`${API_URL}/documents/${id}/export?format=${format}`, {
       headers: getAuthHeaders(),
     });
     
@@ -185,5 +205,39 @@ export const api = {
     // Cleanup
     window.URL.revokeObjectURL(url);
     a.remove();
+  },
+
+  async retryDocument(id: string) {
+    const res = await fetchWithTimeout(`${API_URL}/documents/${id}/retry`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to retry document processing");
+    return res.json();
+  },
+
+  async getDocumentEvents(id: string) {
+    const res = await fetchWithTimeout(`${API_URL}/documents/${id}/events`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to fetch document events");
+    return res.json();
+  },
+
+  async getDocumentExtractionMonitor(id: string) {
+    const res = await fetchWithTimeout(`${API_URL}/documents/${id}/extraction-monitor`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to fetch extraction monitor data");
+    return res.json();
+  },
+
+  async getDocumentStatus(id: string) {
+    const res = await fetchWithTimeout(`${API_URL}/documents/${id}/status`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to fetch document status metadata");
+    return res.json();
   }
 };
+

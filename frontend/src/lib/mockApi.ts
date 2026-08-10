@@ -1,11 +1,11 @@
 // Mock API for document extraction
+import { getAuthHeaders } from "./api";
 
 export interface ExtractedPage {
   pageNumber: number;
   text: string;
   imageUrl?: string; // 🔥 URL for the specific page image
 }
-
 
 export interface PatientInfo {
   name?: string;
@@ -49,16 +49,23 @@ export interface ExtractedDocument {
 
 const API_URL = 'http://localhost:8000';
 
-export const uploadDocument = async (file: File): Promise<ExtractedDocument> => {
+export const uploadDocument = async (file: File): Promise<any> => {
   const formData = new FormData();
   formData.append('file', file);
+  
+  const activeProjectId = localStorage.getItem("activeProjectId");
+  if (activeProjectId) {
+    formData.append('project_id', activeProjectId);
+  }
 
   const response = await fetch(`${API_URL}/upload`, {
     method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+    },
     body: formData,
   });
 
   if (!response.ok) throw new Error('Upload failed');
   return response.json();
 };
-

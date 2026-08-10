@@ -1,6 +1,10 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
-import os
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -17,11 +21,12 @@ class Settings(BaseSettings):
     ALLOWED_EXTENSIONS: str = "pdf,jpg,jpeg,png"
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:8080"
     CPU_THREADS: int = 4
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:Admin@localhost:5432/pdf_reader"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:Admin@localhost:5432/text_extractor"
     SECRET_KEY: str = "9e1201d4a8efc91a0c4f82bb525547a46fa7dfa442bf50b1e4f481c002241cfb"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    USE_DOCLING: bool = True
 
     @property
     def cors_origins_list(self) -> List[str]:

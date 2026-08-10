@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronLeft, ChevronRight, Copy, Check, FileText, LayoutDashboard } from "lucide-react";
 import type { ExtractedDocument } from "@/lib/mockApi";
 import { Tooltip } from "./ui/Tooltip";
-// import { MedicalReportView } from "./MedicalReportView";
 
 interface TextPanelProps {
   document: ExtractedDocument;
@@ -157,26 +156,6 @@ export function TextPanel({ document, currentPage, onPageChange }: TextPanelProp
             </motion.div>
           )}
 
-          {/* Commented out structured report view for later use
-          {activeTab === "report" && (
-            <motion.div
-              key="report"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              {document.structuredData ? (
-                <MedicalReportView data={document.structuredData} />
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center p-12 text-center">
-                  <LayoutDashboard className="w-12 h-12 text-muted-foreground mb-4 opacity-20" />
-                  <p className="text-muted-foreground">No structured data available for this document.</p>
-                </div>
-              )}
-            </motion.div>
-          )}
-          */}
         </AnimatePresence>
       </div>
 

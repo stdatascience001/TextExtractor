@@ -3,15 +3,20 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/TooltipProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import MyDocuments from "./pages/MyDocuments";
-import ViewDocument from "./pages/ViewDocument";
-import Profile from "./pages/Profile";
+import { lazy, Suspense } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
-import { AnimationProvider } from "./animations/AnimationProvider";
+import { AnimationProvider } from "./components/animations/AnimationProvider";
+
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const MyDocuments = lazy(() => import("./pages/MyDocuments"));
+const ViewDocument = lazy(() => import("./pages/ViewDocument"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Assistant = lazy(() => import("./pages/Assistant"));
+const ProjectList = lazy(() => import("./modules/projects/pages/ProjectList"));
+const ProjectDetail = lazy(() => import("./modules/projects/pages/ProjectDetail"));
 
 const queryClient = new QueryClient();
 
@@ -23,18 +28,28 @@ const App = () => (
         <Sonner />
         <AuthProvider>
           <BrowserRouter>
-            <Routes>
-            <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/my-documents" element={<MyDocuments />} />
-            <Route path="/documents/:id" element={<ViewDocument />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+            <Suspense fallback={
+              <div className="h-screen w-screen flex items-center justify-center bg-background text-muted-foreground font-medium">
+                Loading...
+              </div>
+            }>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/projects" element={<ProjectList />} />
+                <Route path="/projects/:projectId" element={<ProjectDetail />} />
+                <Route path="/projects/:projectId/workspace" element={<Assistant />} />
+                <Route path="/documents/:documentId/workspace" element={<Assistant />} />
+                <Route path="/assistant" element={<Assistant />} />
+                <Route path="/my-documents" element={<MyDocuments />} />
+                <Route path="/documents/:id" element={<ViewDocument />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </AuthProvider>
       </AnimationProvider>
     </TooltipProvider>
   </QueryClientProvider>

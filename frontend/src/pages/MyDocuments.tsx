@@ -23,6 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popove
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Button } from "../components/ui/button";
 import { cn } from "../lib/utils";
+import { SidebarLayout } from "@/shared/layouts/SidebarLayout";
 
 export default function MyDocuments() {
   const [documents, setDocuments] = useState<any[]>([]);
@@ -31,16 +32,16 @@ export default function MyDocuments() {
   const [page, setPage] = useState(1);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [documentToDelete, setDocumentToDelete] = useState<{ id: string, fileName: string } | null>(null);
-  
+
   // Filters
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [sortOption, setSortOption] = useState("newest");
-  
+
   const limit = 9;
-  
+
   const { isAuthenticated, user, logout, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -63,7 +64,7 @@ export default function MyDocuments() {
     setLoading(true);
     try {
       const skip = (page - 1) * limit;
-      
+
       let sortBy = "created_at";
       let sortOrder = "desc";
       if (sortOption === "oldest") {
@@ -106,12 +107,12 @@ export default function MyDocuments() {
   const confirmDelete = async () => {
     if (!documentToDelete) return;
     const { id } = documentToDelete;
-    
+
     setIsDeleting(id);
     try {
       await api.deleteDocument(id);
       toast({ title: "Deleted", description: "Document deleted successfully." });
-      
+
       if (documents.length === 1 && page > 1) {
         setPage(page - 1);
       } else {
@@ -136,27 +137,8 @@ export default function MyDocuments() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-[115rem] mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 overflow-hidden flex items-center justify-center bg-card">
-              <img src="/favicon1.png" alt="Logo" className="w-full h-full object-contain p-1" />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-foreground hover:text-primary transition-colors">DocExtract</h1>
-              <p className="text-xs text-muted-foreground">My Documents</p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link to="/profile" className="font-medium hover:text-primary transition-colors">{user?.username}</Link>
-            <LogoutButton className="text-muted-foreground hover:text-foreground transition-colors" />
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-[115rem] mx-auto px-6 py-8">
+    <SidebarLayout>
+      <div className="space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Document Dashboard</h2>
@@ -172,7 +154,7 @@ export default function MyDocuments() {
         {/* Dashboard Filters */}
         <div className="bg-card border border-border rounded-xl p-4 mb-8 shadow-sm">
           <div className="flex flex-col lg:flex-row gap-4">
-            
+
             {/* Search Bar */}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -314,10 +296,10 @@ export default function MyDocuments() {
                     {/* Thumbnail / Header Area */}
                     <div className="h-32 bg-muted flex items-center justify-center border-b border-border relative overflow-hidden">
                       {doc.file_type === "image" ? (
-                        <img 
-                          src={doc.file_path.startsWith('http') ? doc.file_path : `http://localhost:8000${doc.file_path}`} 
-                          alt={doc.file_name} 
-                          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
+                        <img
+                          src={doc.file_path.startsWith('http') ? doc.file_path : `http://127.0.0.1:8000${doc.file_path}`}
+                          alt={doc.file_name}
+                          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                         />
                       ) : (
                         <FileText className="w-12 h-12 text-muted-foreground opacity-50" />
@@ -325,8 +307,14 @@ export default function MyDocuments() {
                       <div className="absolute top-3 left-3 px-2 py-1 bg-background/80 backdrop-blur-sm rounded text-xs font-medium text-foreground uppercase shadow-sm">
                         {doc.file_type}
                       </div>
+                      <div className={`absolute top-3 right-3 px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm ${doc.status === 'completed' ? 'bg-green-500/90 text-white' :
+                        doc.status === 'failed' ? 'bg-red-500/90 text-white' :
+                          'bg-yellow-500/90 text-black border border-yellow-300 animate-pulse'
+                        }`}>
+                        {doc.status || 'uploaded'}
+                      </div>
                     </div>
-                    
+
                     {/* Content */}
                     <div className="p-5">
                       <h3 className="font-semibold text-foreground truncate mb-2" title={doc.file_name}>
@@ -336,11 +324,11 @@ export default function MyDocuments() {
                         <CalendarIcon className="w-3.5 h-3.5 mr-1.5" />
                         {format(new Date(doc.created_at), "MMM d, yyyy • h:mm a")}
                       </div>
-                      
+
                       {/* Actions */}
                       <div className="flex items-center gap-3">
                         <Tooltip title="View Document" description="Open this document to view its extracted text.">
-                          <Link 
+                          <Link
                             to={`/documents/${doc.id}`}
                             className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors"
                           >
@@ -387,7 +375,7 @@ export default function MyDocuments() {
             )}
           </>
         )}
-      </main>
+      </div>
 
       <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
         <AlertDialogContent>
@@ -399,7 +387,7 @@ export default function MyDocuments() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-transparent border border-input hover:bg-white hover:text-black transition-colors">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -408,6 +396,6 @@ export default function MyDocuments() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </SidebarLayout>
   );
 }

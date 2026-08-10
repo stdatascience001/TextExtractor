@@ -14,3 +14,4 @@ asyncpg==0.31.0
 greenlet==3.5.4
 pyjwt==2.13.0
 bcrypt==5.0.0
+pgvector==0.2.5

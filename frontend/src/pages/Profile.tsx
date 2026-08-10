@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 import { User as UserIcon, Lock, Trash2, ArrowLeft, Loader2, Save } from "lucide-react";
 import { format } from "date-fns";
 import { Tooltip } from "../components/ui/Tooltip";
+import { SidebarLayout } from "@/shared/layouts/SidebarLayout";
 
 export default function Profile() {
   const { user, logout, isAuthenticated, isLoading: isAuthLoading } = useAuth();
@@ -125,29 +126,8 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-[115rem] mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Tooltip title="Back to Home" placement="bottom">
-              <Link to="/" className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-            </Tooltip>
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">Account Settings</h1>
-              <p className="text-xs text-muted-foreground">Manage your profile and data</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 text-sm">
-            <Link to="/my-documents" className="font-medium hover:text-primary transition-colors">My Documents</Link>
-            <LogoutButton className="text-muted-foreground hover:text-foreground transition-colors" />
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-6 py-12 space-y-8">
+    <SidebarLayout>
+      <div className="space-y-6">
 
         {/* Statistics Section */}
         <motion.section
@@ -312,7 +292,7 @@ export default function Profile() {
           </AlertDialog>
         </motion.section>
 
-      </main>
-    </div>
+      </div>
+    </SidebarLayout>
   );
 }
