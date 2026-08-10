@@ -18,7 +18,7 @@ import { LogoutButton } from "../components/LogoutButton";
 import { motion } from "framer-motion";
 import { User as UserIcon, Lock, Trash2, ArrowLeft, Loader2, Save } from "lucide-react";
 import { format } from "date-fns";
-import { Tooltip } from "../components/ui/Tooltip";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { SidebarLayout } from "@/shared/layouts/SidebarLayout";
 
 export default function Profile() {

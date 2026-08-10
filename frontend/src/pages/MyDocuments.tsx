@@ -17,7 +17,7 @@ import { LogoutButton } from "../components/LogoutButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Trash2, Eye, Loader2, Calendar as CalendarIcon, Search, FilterX, SortDesc } from "lucide-react";
 import { format } from "date-fns";
-import { Tooltip } from "../components/ui/Tooltip";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { Calendar } from "../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";

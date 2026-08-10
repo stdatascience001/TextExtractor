@@ -8,7 +8,7 @@ import { useToast } from "../components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, ArrowLeft, Download, FileText, Code, Table, X, Check, RefreshCw, AlertTriangle, Activity, Cpu, Eye, List, Layers, ShieldCheck, Database, Info, MessageSquare } from "lucide-react";
 import { ExtractedDocument } from "../lib/mockApi";
-import { Tooltip } from "../components/ui/Tooltip";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { DocumentStatusProvider, useDocumentStatusContext } from "../contexts/DocumentStatusContext";
 import { INGESTION_STAGES } from "../lib/DocumentLifecycle";
 
