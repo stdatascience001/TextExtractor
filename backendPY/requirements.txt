@@ -6,8 +6,9 @@ pymupdf==1.23.8
 paddlepaddle==3.2.2
 paddleocr>=2.7.0
 Pillow==10.2.0
-opencv-python-headless==4.9.0.80
-numpy<2
+opencv-python-headless==5.0.0.93
+numpy>=2
+aiosqlite==0.20.0
 pydantic-settings==2.14.2
 sqlalchemy==2.0.51
 alembic==1.18.5
