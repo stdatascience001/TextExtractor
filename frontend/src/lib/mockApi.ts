@@ -38,13 +38,14 @@ export interface StructuredMedicalData {
 }
 
 export interface ExtractedDocument {
-  fileType: "pdf" | "image";
+  fileType: "pdf" | "image" | "docx" | "text";
   pages: ExtractedPage[];
   fileName: string;
   fileUrl: string; // URL for displaying the document
   extractedText?: string; // Optional full extracted text
   structuredData?: StructuredMedicalData;
   fullText?: string;
+  status?: string;
 }
 
 const API_URL = 'http://localhost:8000';

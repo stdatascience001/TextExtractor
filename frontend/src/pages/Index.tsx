@@ -99,7 +99,6 @@ const Index = () => {
       }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
-    } finally {
       setIsLoading(false);
     }
   }, [navigate, toast]);

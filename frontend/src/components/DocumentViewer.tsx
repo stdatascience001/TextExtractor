@@ -36,8 +36,8 @@ export function DocumentViewer({
         <AnimatePresence mode="wait">
           {isPdf ? (
             <motion.iframe
-              key={fileUrl}
-              src={`${fileUrl}#view=FitH`}
+              key={`${fileUrl}-${currentPage}`}
+              src={`${fileUrl}#page=${currentPage}&view=FitH`}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.02 }}

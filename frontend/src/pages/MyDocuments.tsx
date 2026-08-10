@@ -84,7 +84,16 @@ export default function MyDocuments() {
         formattedEnd = d.toISOString();
       }
 
-      const data = await api.getDocuments(skip, limit, debouncedQuery, formattedStart, formattedEnd, sortBy, sortOrder);
+      const data = await api.getDocuments(
+        skip,
+        limit,
+        debouncedQuery,
+        undefined, // project_id
+        formattedStart,
+        formattedEnd,
+        sortBy,
+        sortOrder
+      );
       setDocuments(data.documents);
       setTotal(data.total);
     } catch (err: any) {

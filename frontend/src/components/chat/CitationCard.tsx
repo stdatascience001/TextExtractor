@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileText, ExternalLink } from 'lucide-react';
+import { Tooltip } from '@/components/ui/Tooltip';
 
 interface Citation {
   document_id: string;
@@ -21,22 +22,28 @@ interface CitationCardProps {
 
 export function CitationCard({ citation, onClick, isActive = false }: CitationCardProps) {
   return (
-    <motion.button
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.2 }}
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
-        isActive
-          ? 'border-primary bg-primary/10 text-primary shadow-sm font-semibold'
-          : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-slate-300'
-      }`}
-      title={`${citation.document_name} - Page ${citation.page_number}\n"${citation.snippet.substring(0, 120)}..."`}
+    <Tooltip
+      title={`${citation.document_name} - Page ${citation.page_number}`}
+      description={citation.snippet}
+      placement="top"
+      maxWidth={350}
     >
-      <FileText className="h-3 w-3 shrink-0" />
-      <span>Page {citation.page_number}</span>
-      <ExternalLink className="h-3 w-3 shrink-0 opacity-60 ml-0.5" />
-    </motion.button>
+      <motion.button
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.2 }}
+        onClick={onClick}
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+          isActive
+            ? 'border-primary bg-primary/10 text-primary shadow-sm font-semibold'
+            : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-slate-300'
+        }`}
+      >
+        <FileText className="h-3 w-3 shrink-0" />
+        <span>Page {citation.page_number}</span>
+        <ExternalLink className="h-3 w-3 shrink-0 opacity-60 ml-0.5" />
+      </motion.button>
+    </Tooltip>
   );
 }
 

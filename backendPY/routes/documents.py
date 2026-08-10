@@ -127,14 +127,30 @@ async def list_documents(
     
     if start_date:
         try:
-            parsed_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            cleaned_start = start_date.replace('Z', '+00:00')
+            if '+' in cleaned_start:
+                parts = cleaned_start.split('+')
+                cleaned_start = parts[0] + '+' + parts[1].replace(':', '')
+            elif '-' in cleaned_start[10:]:
+                idx = cleaned_start.rfind('-')
+                if idx > 10:
+                    cleaned_start = cleaned_start[:idx] + '-' + cleaned_start[idx+1:].replace(':', '')
+            parsed_start = datetime.fromisoformat(cleaned_start)
             conditions.append(Document.created_at >= parsed_start)
         except ValueError:
             pass
             
     if end_date:
         try:
-            parsed_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            cleaned_end = end_date.replace('Z', '+00:00')
+            if '+' in cleaned_end:
+                parts = cleaned_end.split('+')
+                cleaned_end = parts[0] + '+' + parts[1].replace(':', '')
+            elif '-' in cleaned_end[10:]:
+                idx = cleaned_end.rfind('-')
+                if idx > 10:
+                    cleaned_end = cleaned_end[:idx] + '-' + cleaned_end[idx+1:].replace(':', '')
+            parsed_end = datetime.fromisoformat(cleaned_end)
             conditions.append(Document.created_at <= parsed_end)
         except ValueError:
             pass

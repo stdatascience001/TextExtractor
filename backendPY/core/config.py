@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:Admin@localhost:5432/text_extractor"
     SECRET_KEY: str = "9e1201d4a8efc91a0c4f82bb525547a46fa7dfa442bf50b1e4f481c002241cfb"
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     USE_DOCLING: bool = True
 

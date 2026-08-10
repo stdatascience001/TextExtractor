@@ -285,6 +285,8 @@ class DocumentOrchestrator:
             res_result = await db.execute(stmt_res)
             doc_res = res_result.scalar_one_or_none()
             full_text = "\n".join([p["text"] for p in pages_data])
+            if not full_text.strip():
+                raise ValueError("There is no text to extract from this document.")
             
             # Fetch last_parsed_doc from adapter
             last_parsed_doc = getattr(self.ocr_service, "last_parsed_doc", None)

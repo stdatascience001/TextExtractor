@@ -198,6 +198,7 @@ export function DocumentViewerPanel({
           <div className="max-w-4xl w-full">
             {isPdf ? (
               <iframe
+                key={currentPage}
                 src={`${fileUrl}#page=${currentPage}&view=FitH`}
                 className="w-full h-[800px] border rounded-lg"
                 title={`${selectedDocument.file_name} - PDF Viewer`}

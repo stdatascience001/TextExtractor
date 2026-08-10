@@ -29,7 +29,7 @@ function ViewDocumentContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents] = useState<any[]>([]);
   const [isRetrying, setIsRetrying] = useState(false);
-  
+
   // Extraction Monitor states
   const [viewMode, setViewMode] = useState<"viewer" | "extraction">("viewer");
   const [monitorData, setMonitorData] = useState<any>(null);
@@ -55,7 +55,7 @@ function ViewDocumentContent() {
     if (showLoading) setLoading(true);
     try {
       const data = await api.getDocument(docId);
-      
+
       const formattedData: ExtractedDocument = {
         fileType: data.file_type as "pdf" | "image" | "docx" | "text",
         fileName: data.file_name,
@@ -73,7 +73,7 @@ function ViewDocumentContent() {
       }];
 
       setDocumentData(formattedData);
-      
+
       // Fetch events
       const eventData = await api.getDocumentEvents(docId);
       setEvents(eventData);
@@ -113,7 +113,7 @@ function ViewDocumentContent() {
       const data = await api.retryDocument(id);
       toast({ title: "Pipeline Restarted", description: "The orchestration pipeline has been reset and restarted." });
       setDocumentData(prev => prev ? { ...prev, status: data.status } : null);
-      
+
       const eventData = await api.getDocumentEvents(id);
       setEvents(eventData);
 
@@ -177,7 +177,7 @@ function ViewDocumentContent() {
 
   if (loading || isAuthLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="h-screen bg-background flex flex-col">
         <header className="border-b border-border bg-card/50 backdrop-blur-xl p-4">
           <div className="max-w-[115rem] mx-auto animate-pulse flex h-6 w-32 bg-muted rounded"></div>
         </header>
@@ -195,9 +195,11 @@ function ViewDocumentContent() {
   if (documentData.status && !isFinished) {
     const { activeIndex, progressPercent, remainingTime, stages } = getStageStates(documentData.status);
     const isFailed = documentData.status === "failed";
+    const failedEvent = events.find(e => e.action_name && e.action_name.includes("FAILED"));
+    const errorMessage = failedEvent?.payload?.error || "The background orchestration pipeline ran into an error.";
 
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="h-screen bg-background flex flex-col overflow-y-auto">
         {/* Navigation Toolbar */}
         <header className="border-b border-border bg-card/50 backdrop-blur-xl p-4 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto flex items-center justify-between w-full">
@@ -205,9 +207,8 @@ function ViewDocumentContent() {
               <ArrowLeft className="w-4 h-4" /> Back to Dashboard
             </Link>
             <div className="flex items-center gap-2">
-              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded shadow-sm ${
-                isFailed ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 animate-pulse"
-              }`}>
+              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded shadow-sm ${isFailed ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 animate-pulse"
+                }`}>
                 {documentData.status}
               </span>
             </div>
@@ -216,11 +217,11 @@ function ViewDocumentContent() {
 
         {/* Unified Processing Workspace */}
         <div className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
-          
+
           {/* Failure Alert Banner */}
           {isFailed && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }} 
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-destructive/10 border border-destructive/20 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
             >
@@ -229,12 +230,12 @@ function ViewDocumentContent() {
                 <div>
                   <h3 className="font-semibold text-destructive text-sm">Ingestion Execution Interrupted</h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    The background orchestration pipeline ran into an error. Review the activity log details or retry the run.
+                    {errorMessage} Review the activity log details or retry the run.
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={handleRetry} 
+              <button
+                onClick={handleRetry}
                 disabled={isRetrying}
                 className="flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs font-semibold rounded-lg transition-all shadow-sm shrink-0"
               >
@@ -245,20 +246,20 @@ function ViewDocumentContent() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             {/* LEFT PANEL: Progress & Pipeline Stages */}
             <div className="lg:col-span-2 space-y-6">
-              
+
               {/* Progress Summary Card */}
               <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
                 <div className="flex justify-between items-center text-xs text-muted-foreground">
                   <span className="font-semibold text-foreground uppercase">Ingestion Progress</span>
                   <span>{isFailed ? "Calculation Stopped" : `Estimated remaining: ~${remainingTime}s`}</span>
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
-                  <div 
+                  <div
                     className={`h-2.5 rounded-full transition-all duration-500 ease-out ${isFailed ? "bg-destructive" : "bg-primary"}`}
                     style={{ width: `${isFailed ? 100 : progressPercent}%` }}
                   />
@@ -277,15 +278,14 @@ function ViewDocumentContent() {
                   {stages.map((stage, index) => {
                     const isCompleted = stage.state === "completed";
                     const isRunning = stage.state === "running";
-                    
+
                     return (
-                      <div 
-                        key={stage.key} 
-                        className={`flex items-start gap-4 p-4 rounded-xl border transition-all ${
-                          isRunning ? "border-primary bg-primary/5 shadow-sm" : 
-                          isCompleted ? "border-border bg-card/60 opacity-95" : 
-                          "border-border bg-card/20 opacity-40"
-                        }`}
+                      <div
+                        key={stage.key}
+                        className={`flex items-start gap-4 p-4 rounded-xl border transition-all ${isRunning ? "border-primary bg-primary/5 shadow-sm" :
+                            isCompleted ? "border-border bg-card/60 opacity-95" :
+                              "border-border bg-card/20 opacity-40"
+                          }`}
                       >
                         {/* Step State Icon */}
                         <div className="mt-0.5">
@@ -319,7 +319,7 @@ function ViewDocumentContent() {
 
             {/* RIGHT PANEL: Live Activity Event Log */}
             <div className="space-y-6">
-              
+
               {/* Document Overview */}
               <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
                 <div className="flex items-center gap-3">
@@ -443,7 +443,7 @@ ${content}`;
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-[115rem] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -459,25 +459,23 @@ ${content}`;
               <p className="text-xs text-muted-foreground uppercase">{documentData.fileType} Document</p>
             </div>
           </div>
-          
+
           <div className="flex bg-muted/60 p-1 rounded-xl border border-border">
             <button
               onClick={() => setViewMode("viewer")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                viewMode === "viewer"
-                  ? "bg-card text-foreground shadow shadow-sm"
+              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === "viewer"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               <Eye className="w-3.5 h-3.5 text-primary" /> Split Viewer
             </button>
             <button
               onClick={() => setViewMode("extraction")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                viewMode === "extraction"
-                  ? "bg-card text-foreground shadow shadow-sm"
+              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === "extraction"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               <Cpu className="w-3.5 h-3.5 text-primary" /> Extraction Monitor
             </button>
@@ -509,7 +507,7 @@ ${content}`;
                 <FileText className="w-4 h-4 text-primary" /> TXT
               </button>
             </Tooltip>
-            
+
             <Tooltip
               title="Export as JSON"
               description="Structured data suitable for APIs and integrations."
@@ -540,7 +538,8 @@ ${content}`;
         </div>
       </header>
 
-      <main className="max-w-[115rem] mx-auto px-6 py-8">
+      <main className={`max-w-[115rem] w-full mx-auto px-6 py-6 flex-1 min-h-0 ${viewMode === "viewer" ? "flex flex-col overflow-hidden" : "overflow-y-auto"
+        }`}>
         <AnimatePresence mode="wait">
           {viewMode === "viewer" ? (
             <motion.div
@@ -549,10 +548,10 @@ ${content}`;
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
-              className="space-y-6"
+              className="space-y-6 flex-1 min-h-0 flex flex-col"
             >
               {/* Split view */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[600px]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
                 <DocumentViewer document={documentData} currentPage={currentPage} />
                 <TextPanel
                   document={documentData}
@@ -620,9 +619,8 @@ ${content}`;
                           <h4 className="text-xl font-extrabold text-foreground mt-0.5">{metrics.total_evidence}</h4>
                         </div>
                       </div>
-                      <div className={`border p-5 rounded-2xl flex items-center gap-4 shadow-sm transition-all duration-300 ${
-                        metrics.failed_chunks > 0 ? "bg-red-500/5 border-red-500/25" : "bg-card border-border hover:shadow-md"
-                      }`}>
+                      <div className={`border p-5 rounded-2xl flex items-center gap-4 shadow-sm transition-all duration-300 ${metrics.failed_chunks > 0 ? "bg-red-500/5 border-red-500/25" : "bg-card border-border hover:shadow-md"
+                        }`}>
                         <div className={`p-3 rounded-xl ${metrics.failed_chunks > 0 ? "bg-red-500/15 text-red-500" : "bg-muted text-muted-foreground"}`}>
                           <AlertTriangle className="w-5 h-5" />
                         </div>
@@ -672,7 +670,7 @@ ${content}`;
                         <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
                           <List className="w-4 h-4 text-primary" /> Segment Ingestion Logs
                         </h3>
-                        
+
                         {chunkList.length === 0 ? (
                           <div className="border border-dashed border-border rounded-2xl py-20 text-center text-xs text-muted-foreground">
                             Waiting for document segmentation chunk logs...
@@ -786,33 +784,29 @@ ${content}`;
                 <div className="flex border-b border-border bg-muted/20 px-6 py-2 gap-2 overflow-x-auto">
                   <button
                     onClick={() => setChunkModalTab("facts")}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                      chunkModalTab === "facts" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${chunkModalTab === "facts" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     Claims & Evidence
                   </button>
                   <button
                     onClick={() => setChunkModalTab("raw")}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                      chunkModalTab === "raw" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${chunkModalTab === "raw" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     Raw Content
                   </button>
                   <button
                     onClick={() => setChunkModalTab("prompt")}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                      chunkModalTab === "prompt" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${chunkModalTab === "prompt" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     LLM Prompt
                   </button>
                   <button
                     onClick={() => setChunkModalTab("llm")}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                      chunkModalTab === "llm" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${chunkModalTab === "llm" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     LLM Output (JSON)
                   </button>
@@ -883,13 +877,12 @@ ${content}`;
                                     <span className="text-muted-foreground font-mono text-[10px] uppercase">[{fact.predicate}]</span>
                                     <span className="font-extrabold text-sky-500">{fact.object}</span>
                                   </div>
-                                  
+
                                   {/* Confidence score */}
                                   <div className="flex items-center gap-2 shrink-0">
                                     <span className="text-[9px] text-muted-foreground font-bold uppercase">Confidence</span>
-                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-lg ${
-                                      fact.confidence >= 0.9 ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-500"
-                                    }`}>
+                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-lg ${fact.confidence >= 0.9 ? "bg-green-500/10 text-green-500" : "bg-amber-500/10 text-amber-500"
+                                      }`}>
                                       {Math.round(fact.confidence * 100)}%
                                     </span>
                                   </div>
