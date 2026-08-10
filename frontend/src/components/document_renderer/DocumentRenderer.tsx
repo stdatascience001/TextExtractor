@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useDocumentContext, PageInfo } from "./DocumentContext";
 import { PageRenderer } from "./PageRenderer";
 import { Search, ChevronLeft, ChevronRight, Copy, Check, FileText, LayoutDashboard } from "lucide-react";
-import { Tooltip } from "../ui/Tooltip";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const DocumentRenderer: React.FC = () => {

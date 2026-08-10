@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronLeft, ChevronRight, Copy, Check, FileText, LayoutDashboard } from "lucide-react";
 import type { ExtractedDocument } from "@/lib/mockApi";
-import { Tooltip } from "./ui/Tooltip";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 interface TextPanelProps {
   document: ExtractedDocument;

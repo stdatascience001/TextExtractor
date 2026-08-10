@@ -232,7 +232,7 @@
 import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, FileText, Image, X } from "lucide-react";
-import { Tooltip } from "./ui/Tooltip";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { toast } from "sonner";
 
 export interface SelectedDocument {
