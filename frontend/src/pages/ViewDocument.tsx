@@ -8,7 +8,6 @@ import { useToast } from "../components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, ArrowLeft, Download, FileText, Code, Table, X, Check, RefreshCw, AlertTriangle, Activity, Cpu, Eye, List, Layers, ShieldCheck, Database, Info, MessageSquare } from "lucide-react";
 import { ExtractedDocument } from "../lib/mockApi";
-import { Tooltip } from "@/components/ui/Tooltip";
 import { DocumentStatusProvider, useDocumentStatusContext } from "../contexts/DocumentStatusContext";
 import { INGESTION_STAGES } from "../lib/DocumentLifecycle";
 
@@ -447,11 +446,9 @@ ${content}`;
       <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-[115rem] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Tooltip title="Back to Dashboard" placement="bottom">
-              <Link to="/my-documents" className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted">
+            <Link to="/my-documents" className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-            </Tooltip>
             <div>
               <h1 className="text-lg font-semibold text-foreground truncate max-w-xs md:max-w-md lg:max-w-lg">
                 {documentData.fileName}
@@ -482,58 +479,33 @@ ${content}`;
           </div>
 
           <div className="flex items-center gap-2">
-            <Tooltip
-              title="Chat with Document"
-              description="Open the interactive workspace to chat about this document."
-              placement="bottom"
-            >
-              <Link
+            <Link
                 to={`/documents/${id}/workspace`}
                 className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-all border border-indigo-700 shadow duration-150 active:scale-95"
               >
                 <MessageSquare className="w-4.5 h-4.5" /> Chat
               </Link>
-            </Tooltip>
 
-            <Tooltip
-              title="Export as Text"
-              description="Download plain text without formatting."
-              placement="bottom"
-            >
-              <button
+            <button
                 onClick={() => handleExport("text")}
                 className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted text-sm font-medium rounded-lg transition-colors border border-border"
               >
                 <FileText className="w-4 h-4 text-primary" /> TXT
               </button>
-            </Tooltip>
 
-            <Tooltip
-              title="Export as JSON"
-              description="Structured data suitable for APIs and integrations."
-              placement="bottom"
-              shortcut="⌘+J"
-            >
-              <button
+            <button
                 onClick={() => handleExport("json")}
                 className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted text-sm font-medium rounded-lg transition-colors border border-border"
               >
                 <Code className="w-4 h-4 text-primary" /> JSON
               </button>
-            </Tooltip>
 
-            <Tooltip
-              title="Export as CSV"
-              description="Tabular data ready for Excel or spreadsheets."
-              placement="bottom"
-            >
-              <button
+            <button
                 onClick={() => handleExport("csv")}
                 className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted text-sm font-medium rounded-lg transition-colors border border-border"
               >
                 <Table className="w-4 h-4 text-primary" /> CSV
               </button>
-            </Tooltip>
           </div>
         </div>
       </header>
@@ -851,11 +823,9 @@ ${content}`;
                         ) : (
                           <div className="flex flex-wrap gap-2">
                             {selectedChunk.entities.map((ent: any, idx: number) => (
-                              <Tooltip key={idx} title={ent.description || "Resolved Entity"} placement="top">
-                                <span className="text-[10px] font-bold bg-green-500/10 text-green-500 border border-green-500/20 px-3 py-1 rounded-lg">
+                              <span key={idx} className="text-[10px] font-bold bg-green-500/10 text-green-500 border border-green-500/20 px-3 py-1 rounded-lg" title={ent.description || "Resolved Entity"}>
                                   {ent.name} ({ent.type})
                                 </span>
-                              </Tooltip>
                             ))}
                           </div>
                         )}

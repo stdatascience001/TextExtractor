@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Tooltip } from "@/components/ui/Tooltip";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { FileDropzone, type SelectedDocument } from "@/components/FileDropzone";
 import { DocumentViewer } from "@/components/DocumentViewer";
@@ -144,25 +144,19 @@ const Index = () => {
               <div className="flex items-center gap-4">
                 {isAuthenticated ? (
                   <div className="flex items-center gap-4">
-                    <Tooltip title="My Documents" description="View and manage all your extracted files.">
-                      <Link to="/my-documents" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-                        My Documents
-                      </Link>
-                    </Tooltip>
+                    <Link to="/my-documents" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                      My Documents
+                    </Link>
                     <div className="h-4 w-px bg-border"></div>
-                    <Tooltip title="View Profile" description="Manage your account settings.">
-                      <Link to="/profile" className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-2">
-                        <UserIcon className="w-4 h-4" /> {user?.username}
-                      </Link>
-                    </Tooltip>
-                    <Tooltip title="Sign Out" description="Securely log out of your account." placement="bottom">
-                      <LogoutButton
-                        className="text-sm text-muted-foreground hover:text-red-800 cursor-pointer flex items-center gap-1 transition-colors"
-                        showIcon
-                      >
-                        Logout
-                      </LogoutButton>
-                    </Tooltip>
+                    <Link to="/profile" className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-2">
+                      <UserIcon className="w-4 h-4" /> {user?.username}
+                    </Link>
+                    <LogoutButton
+                      className="text-sm text-muted-foreground hover:text-red-800 cursor-pointer flex items-center gap-1 transition-colors"
+                      showIcon
+                    >
+                      Logout
+                    </LogoutButton>
                   </div>
                 ) : (
                   <button
@@ -255,19 +249,17 @@ const Index = () => {
               >
                 {/* Back button and title */}
                 <div className="flex items-center justify-between">
-                  <Tooltip title="Back to Upload" description="Clear this document and upload another one." placement="bottom">
-                    <motion.button
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      whileHover={{ x: -3 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleClear}
-                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <span>←</span>
-                      <span>Upload New Document</span>
-                    </motion.button>
-                  </Tooltip>
+                  <motion.button
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ x: -3 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleClear}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <span>←</span>
+                    <span>Upload New Document</span>
+                  </motion.button>
                   <div className="flex items-center gap-4">
                     <motion.div
                       initial={{ opacity: 0 }}
@@ -277,18 +269,16 @@ const Index = () => {
                     >
                       {document.pages.length} page{document.pages.length > 1 ? "s" : ""} extracted
                     </motion.div>
-                    <Tooltip title="Save Document" description="Save this document to your account for later viewing." shortcut="⌘+S" placement="bottom">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                      >
-                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                        {isSaving ? "Saving..." : "Save Document"}
-                      </motion.button>
-                    </Tooltip>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    >
+                      {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                      {isSaving ? "Saving..." : "Save Document"}
+                    </motion.button>
                   </div>
                 </div>
 

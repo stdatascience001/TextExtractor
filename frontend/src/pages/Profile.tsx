@@ -18,7 +18,6 @@ import { LogoutButton } from "../components/LogoutButton";
 import { motion } from "framer-motion";
 import { User as UserIcon, Lock, Trash2, ArrowLeft, Loader2, Save } from "lucide-react";
 import { format } from "date-fns";
-import { Tooltip } from "@/components/ui/Tooltip";
 import { SidebarLayout } from "@/shared/layouts/SidebarLayout";
 
 export default function Profile() {
@@ -187,8 +186,7 @@ export default function Profile() {
                 className="w-full p-2.5 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               />
             </div>
-            <Tooltip title="Save Changes" description="Update your public profile information.">
-              <button
+            <button
                 type="submit"
                 disabled={isUpdatingUsername || username === profileData?.username}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -196,7 +194,6 @@ export default function Profile() {
                 {isUpdatingUsername ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes
               </button>
-            </Tooltip>
           </form>
         </motion.section>
 
@@ -231,8 +228,7 @@ export default function Profile() {
                 className="w-full p-2.5 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               />
             </div>
-            <Tooltip title="Update Password" description="Securely change your account password.">
-              <button
+            <button
                 type="submit"
                 disabled={isUpdatingPassword || !currentPassword || !newPassword}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -240,7 +236,6 @@ export default function Profile() {
                 {isUpdatingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Update Password
               </button>
-            </Tooltip>
           </form>
         </motion.section>
 
@@ -263,13 +258,11 @@ export default function Profile() {
                 disabled={isDeleting}
                 className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg text-sm font-medium hover:bg-destructive/90 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                {/* Wrap in Tooltip here, since the button is the trigger */}
-                <Tooltip title="Delete Account" description="This action is permanent and irreversible." placement="top">
-                  <div className="flex items-center gap-2">
+                {/* Delete button content */}
+                <div className="flex items-center gap-2">
                     {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                     Delete Account
                   </div>
-                </Tooltip>
               </button>
             </AlertDialogTrigger>
             <AlertDialogContent>

@@ -10,8 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip } from "@/components/ui/Tooltip";
-import { TooltipProvider } from "@/components/ui/TooltipProvider";
+
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -108,7 +107,6 @@ const SidebarProvider = React.forwardRef<
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <TooltipProvider delayDuration={0}>
         <div
           style={
             {
@@ -123,7 +121,6 @@ const SidebarProvider = React.forwardRef<
         >
           {children}
         </div>
-      </TooltipProvider>
     </SidebarContext.Provider>
   );
 });
@@ -439,7 +436,7 @@ const SidebarMenuButton = React.forwardRef<
   React.ComponentProps<"button"> & {
     asChild?: boolean;
     isActive?: boolean;
-    tooltip?: string | React.ComponentProps<typeof Tooltip>;
+    tooltip?: string | { content?: string };
   } & VariantProps<typeof sidebarMenuButtonVariants>
 >(({ asChild = false, isActive = false, variant = "default", size = "default", tooltip, className, ...props }, ref) => {
   const Comp = asChild ? Slot : "button";
@@ -460,26 +457,11 @@ const SidebarMenuButton = React.forwardRef<
     return button;
   }
 
-  let tooltipProps: any = tooltip;
-  if (typeof tooltip === "string") {
-    tooltipProps = {
-      content: tooltip,
-    };
-  } else if (tooltipProps.children) {
-    tooltipProps.content = tooltipProps.children;
-    delete tooltipProps.children;
-  }
+  const tooltipText = typeof tooltip === "string" ? tooltip : tooltip?.content || "";
 
-  return (
-    <Tooltip
-      placement="right"
-      align="center"
-      disabled={state !== "collapsed" || isMobile}
-      {...tooltipProps}
-    >
-      {button}
-    </Tooltip>
-  );
+  return React.cloneElement(button as React.ReactElement, {
+    title: state === "collapsed" && !isMobile ? tooltipText : undefined,
+  });
 });
 SidebarMenuButton.displayName = "SidebarMenuButton";
 

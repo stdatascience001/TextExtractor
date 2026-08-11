@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Tooltip } from '@/components/ui/Tooltip';
+
 
 interface Document {
   id: string;
@@ -128,41 +128,39 @@ export function DocumentViewerPanel({
         <div className="flex items-center gap-2">
           {/* Zoom Controls */}
           <div className="flex items-center gap-1 border-r border-border pr-2">
-            <Tooltip content="Zoom Out">
-              <Button
+            <Button
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0"
                 onClick={handleZoomOut}
                 disabled={zoom <= 0.5}
                 aria-label="Zoom Out"
+                title="Zoom Out"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
-            </Tooltip>
             <span className="text-xs font-medium w-12 text-center">{Math.round(zoom * 100)}%</span>
-            <Tooltip content="Zoom In">
-              <Button
+            <Button
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0"
                 onClick={handleZoomIn}
                 disabled={zoom >= 3}
                 aria-label="Zoom In"
+                title="Zoom In"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
-            </Tooltip>
           </div>
 
           {/* Fullscreen Toggle */}
-          <Tooltip content={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
-            <Button
+          <Button
               variant="ghost"
               size="sm"
               className="h-8 w-8 p-0"
               onClick={() => setIsFullscreen(!isFullscreen)}
               aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             >
               {isFullscreen ? (
                 <Minimize2 className="h-4 w-4" />
@@ -170,20 +168,18 @@ export function DocumentViewerPanel({
                 <Maximize2 className="h-4 w-4" />
               )}
             </Button>
-          </Tooltip>
 
           {citationHighlight && (
-            <Tooltip content="Clear Highlight">
-              <Button
+            <Button
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0"
                 onClick={onHighlightClear}
                 aria-label="Clear Highlight"
+                title="Clear Highlight"
               >
                 <X className="h-4 w-4" />
               </Button>
-            </Tooltip>
           )}
         </div>
       </div>
@@ -244,17 +240,16 @@ export function DocumentViewerPanel({
       {/* Footer - Page Navigation */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between p-4 border-t border-border flex-shrink-0 bg-background">
-          <Tooltip content="Previous Page">
-            <Button
+          <Button
               variant="outline"
               size="sm"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage <= 1}
+              title="Previous Page"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
             </Button>
-          </Tooltip>
 
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
@@ -273,17 +268,16 @@ export function DocumentViewerPanel({
             </div>
           </div>
 
-          <Tooltip content="Next Page">
-            <Button
+          <Button
               variant="outline"
               size="sm"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
+              title="Next Page"
             >
               Next
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
-          </Tooltip>
         </div>
       )}
     </div>

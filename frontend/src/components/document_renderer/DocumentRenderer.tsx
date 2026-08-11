@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useDocumentContext, PageInfo } from "./DocumentContext";
 import { PageRenderer } from "./PageRenderer";
 import { Search, ChevronLeft, ChevronRight, Copy, Check, FileText, LayoutDashboard } from "lucide-react";
-import { Tooltip } from "@/components/ui/Tooltip";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 export const DocumentRenderer: React.FC = () => {
@@ -86,9 +86,9 @@ export const DocumentRenderer: React.FC = () => {
             </button>
           </div>
 
-          <Tooltip title="Copy Text" description="Copy the active page's text to clipboard." placement="bottom">
-            <button
+          <button
               onClick={handleCopy}
+              title="Copy the active page's text to clipboard."
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
             >
               {copied ? (
@@ -101,7 +101,6 @@ export const DocumentRenderer: React.FC = () => {
                 </span>
               )}
             </button>
-          </Tooltip>
         </div>
 
         {/* Search */}
@@ -168,15 +167,14 @@ export const DocumentRenderer: React.FC = () => {
       {/* Footer Page Navigation */}
       <div className="p-4 bg-muted/30 border-t border-border/50">
         <div className="flex items-center justify-between max-w-sm mx-auto bg-background/80 backdrop-blur-md border border-border/50 rounded-2xl p-1.5 shadow-lg">
-          <Tooltip title="Previous Page" shortcut="←">
-            <button
+          <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
               className="p-2 rounded-xl hover:bg-muted disabled:opacity-20 transition-colors"
+              title="Previous Page (←)"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-          </Tooltip>
 
           <div className="flex items-center gap-2 px-4">
             <span className="text-sm font-bold text-primary">{currentPage}</span>
@@ -184,15 +182,14 @@ export const DocumentRenderer: React.FC = () => {
             <span className="text-xs text-muted-foreground font-medium">{totalPages}</span>
           </div>
 
-          <Tooltip title="Next Page" shortcut="→">
-            <button
+          <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
               className="p-2 rounded-xl hover:bg-muted disabled:opacity-20 transition-colors"
+              title="Next Page (→)"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
-          </Tooltip>
         </div>
       </div>
     </motion.div>

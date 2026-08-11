@@ -4,7 +4,6 @@ import { Send, Paperclip, X, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Tooltip } from '@/components/ui/Tooltip';
 
 interface ChatInputProps {
   value: string;
@@ -142,8 +141,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <Tooltip content="Attach files">
-          <Button
+        <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
@@ -153,7 +151,6 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(({
           >
             <Paperclip className="h-4 w-4" />
           </Button>
-        </Tooltip>
 
         <Textarea
           ref={setRef}
@@ -175,8 +172,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(({
         {/* Action Buttons */}
         <div className="flex items-center gap-1.5 shrink-0">
           {value.length > 0 && (
-            <Tooltip content="Clear input">
-              <Button
+            <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-muted-foreground hover:text-foreground"
@@ -186,11 +182,9 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               >
                 <X className="h-4 w-4" />
               </Button>
-            </Tooltip>
           )}
 
-          <Tooltip content="Send message">
-            <Button
+          <Button
               size="sm"
               className="h-8 px-4 rounded-lg bg-primary hover:bg-primary/90 text-white font-medium text-xs shadow-sm transition-colors shrink-0"
               disabled={disabled || !value.trim()}
@@ -199,7 +193,6 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(({
             >
               send
             </Button>
-          </Tooltip>
         </div>
       </div>
 

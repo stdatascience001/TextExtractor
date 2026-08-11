@@ -13,7 +13,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { Tooltip } from "@/components/ui/Tooltip";
 
 interface LogoutButtonProps {
   className?: string;
@@ -32,18 +31,10 @@ export function LogoutButton({ className, showIcon = true, children }: LogoutBut
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <button className={cn("flex items-center gap-2", className)}>
-          {/* Wrap only the icon button with tooltip if children is empty, or wrap the whole button */}
-          <Tooltip 
-            title="Sign Out" 
-            description="Securely end your session."
-            placement="bottom"
-            disabled={!!children}
-          >
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
               {showIcon && <LogOut className="w-4 h-4" />}
               {children}
             </div>
-          </Tooltip>
         </button>
       </AlertDialogTrigger>
       <AlertDialogContent>

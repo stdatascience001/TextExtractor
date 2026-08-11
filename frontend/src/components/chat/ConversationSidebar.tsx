@@ -21,7 +21,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tooltip } from '@/components/ui/Tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -135,8 +134,7 @@ export function ConversationSidebar({
       {/* Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <Tooltip content="Back to Document View">
-            <Button
+          <Button
               onClick={() => navigate(documents[0] ? `/documents/${documents[0].id}` : '/my-documents')}
               variant="outline"
               size="icon"
@@ -145,9 +143,7 @@ export function ConversationSidebar({
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-          </Tooltip>
-          <Tooltip content="Create New Chat" className="flex-1 w-full">
-            <Button
+          <Button
               onClick={() => onNewConversation('New Conversation')}
               className="w-full gap-2"
               size="sm"
@@ -156,7 +152,6 @@ export function ConversationSidebar({
               <Plus className="h-4 w-4" />
               New Chat
             </Button>
-          </Tooltip>
         </div>
 
         <div className="mt-3 relative">
@@ -273,8 +268,7 @@ export function ConversationSidebar({
 
       {/* Footer */}
       <div className="p-4 border-t border-border">
-        <Tooltip content={showArchived ? 'Hide Archived Conversations' : 'Show Archived Conversations'} className="w-full">
-          <Button
+        <Button
             variant="ghost"
             size="sm"
             className="w-full justify-start gap-2"
@@ -283,7 +277,6 @@ export function ConversationSidebar({
             <Folder className="h-4 w-4" />
             {showArchived ? 'Hide Archived' : 'Show Archived'}
           </Button>
-        </Tooltip>
       </div>
     </div>
   );
@@ -366,8 +359,7 @@ function ConversationItem({
               )}
             </div>
             <DropdownMenu>
-              <Tooltip content="Conversation Options">
-                <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -377,7 +369,6 @@ function ConversationItem({
                     <Edit2 className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
-              </Tooltip>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStartRename(); }}>
                   <Edit2 className="h-4 w-4 mr-2" />

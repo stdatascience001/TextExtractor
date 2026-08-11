@@ -17,7 +17,6 @@ import { LogoutButton } from "../components/LogoutButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Trash2, Eye, Loader2, Calendar as CalendarIcon, Search, FilterX, SortDesc } from "lucide-react";
 import { format } from "date-fns";
-import { Tooltip } from "@/components/ui/Tooltip";
 import { Calendar } from "../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
@@ -153,11 +152,9 @@ export default function MyDocuments() {
             <h2 className="text-2xl font-bold text-foreground">Document Dashboard</h2>
             <p className="text-muted-foreground text-sm mt-1">Manage and search your extracted documents</p>
           </div>
-          <Tooltip title="New Extraction" description="Upload a new PDF or image to extract its text." placement="left">
-            <Link to="/" className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm">
+          <Link to="/" className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm">
               + New Extraction
             </Link>
-          </Tooltip>
         </div>
 
         {/* Dashboard Filters */}
@@ -256,14 +253,12 @@ export default function MyDocuments() {
 
             {/* Clear Filters */}
             {(query || startDate || endDate || sortOption !== "newest") && (
-              <Tooltip title="Clear Filters" description="Reset search, dates, and sort options.">
-                <button
+              <button
                   onClick={clearFilters}
                   className="px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors flex items-center gap-1"
                 >
                   <FilterX className="w-4 h-4" /> Clear
                 </button>
-              </Tooltip>
             )}
           </div>
         </div>
@@ -336,23 +331,19 @@ export default function MyDocuments() {
 
                       {/* Actions */}
                       <div className="flex items-center gap-3">
-                        <Tooltip title="View Document" description="Open this document to view its extracted text.">
-                          <Link
+                        <Link
                             to={`/documents/${doc.id}`}
                             className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors"
                           >
                             <Eye className="w-4 h-4" /> View
                           </Link>
-                        </Tooltip>
-                        <Tooltip title="Delete Document" description="Permanently delete this document and its data.">
-                          <button
+                        <button
                             onClick={() => setDocumentToDelete({ id: doc.id, fileName: doc.file_name })}
                             disabled={isDeleting === doc.id}
                             className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors disabled:opacity-50"
                           >
                             {isDeleting === doc.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                           </button>
-                        </Tooltip>
                       </div>
                     </div>
                   </motion.div>
