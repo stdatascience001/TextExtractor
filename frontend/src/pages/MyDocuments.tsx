@@ -153,8 +153,8 @@ export default function MyDocuments() {
             <p className="text-muted-foreground text-sm mt-1">Manage and search your extracted documents</p>
           </div>
           <Link to="/" className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm">
-              + New Extraction
-            </Link>
+            + New Extraction
+          </Link>
         </div>
 
         {/* Dashboard Filters */}
@@ -237,7 +237,7 @@ export default function MyDocuments() {
                   handleFilterChange();
                 }}
               >
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-[180px]">
                   <div className="flex items-center gap-2">
                     <SortDesc className="w-4 h-4 text-muted-foreground hidden sm:block" />
                     <SelectValue placeholder="Sort by..." />
@@ -254,11 +254,11 @@ export default function MyDocuments() {
             {/* Clear Filters */}
             {(query || startDate || endDate || sortOption !== "newest") && (
               <button
-                  onClick={clearFilters}
-                  className="px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors flex items-center gap-1"
-                >
-                  <FilterX className="w-4 h-4" /> Clear
-                </button>
+                onClick={clearFilters}
+                className="px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors flex items-center gap-1"
+              >
+                <FilterX className="w-4 h-4" /> Clear
+              </button>
             )}
           </div>
         </div>
@@ -332,18 +332,18 @@ export default function MyDocuments() {
                       {/* Actions */}
                       <div className="flex items-center gap-3">
                         <Link
-                            to={`/documents/${doc.id}`}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors"
-                          >
-                            <Eye className="w-4 h-4" /> View
-                          </Link>
+                          to={`/documents/${doc.id}`}
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors"
+                        >
+                          <Eye className="w-4 h-4" /> View
+                        </Link>
                         <button
-                            onClick={() => setDocumentToDelete({ id: doc.id, fileName: doc.file_name })}
-                            disabled={isDeleting === doc.id}
-                            className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            {isDeleting === doc.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                          </button>
+                          onClick={() => setDocumentToDelete({ id: doc.id, fileName: doc.file_name })}
+                          disabled={isDeleting === doc.id}
+                          className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          {isDeleting === doc.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                        </button>
                       </div>
                     </div>
                   </motion.div>

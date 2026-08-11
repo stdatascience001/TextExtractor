@@ -45,6 +45,7 @@ app.add_middleware(
 register_exception_handlers(app)
 
 # Mount files static folder
+os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/files", StaticFiles(directory=settings.UPLOAD_DIR), name="files")
 
 # API Versioning: V1 Router
