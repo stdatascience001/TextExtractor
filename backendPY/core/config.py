@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     UPLOAD_DIR: str = "uploads"
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
-    ALLOWED_EXTENSIONS: str = "pdf,jpg,jpeg,png"
+    ALLOWED_EXTENSIONS: str = "pdf,jpg,jpeg,png,docx,txt,csv,xlsx,xls"
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:8080"
     CPU_THREADS: int = 4
     DATABASE_URL: str = "postgresql+asyncpg://postgres:Admin@localhost:5432/text_extractor"

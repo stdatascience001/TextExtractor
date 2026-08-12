@@ -38,7 +38,7 @@ export interface StructuredMedicalData {
 }
 
 export interface ExtractedDocument {
-  fileType: "pdf" | "image" | "docx" | "text";
+  fileType: "pdf" | "image" | "docx" | "text" | "spreadsheet";
   pages: ExtractedPage[];
   fileName: string;
   fileUrl: string; // URL for displaying the document

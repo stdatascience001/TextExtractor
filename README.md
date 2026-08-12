@@ -8,13 +8,76 @@
 
 ## 🌟 Key Features
 
-* **Intelligent Text Extraction**: Upload PDFs or images and instantly extract text using hardware-accelerated Optical Character Recognition (OCR).
+* **Intelligent Text Extraction**: Upload PDFs or images and instantly extract text using hardware-accelerated Optical Character Recognition (OCR) and advanced document parsers.
 * **Premium User Interface**: A beautifully crafted React frontend featuring:
   * 🧊 **Glassmorphism Design**: Sleek, semi-transparent UI elements with beautiful blur effects (Tooltips, Dropdowns, Popovers).
   * 🪄 **Micro-interactions**: Fluid, physics-based animations powered by Framer Motion.
   * 🌗 **Split-Pane Viewer**: High-resolution side-by-side document inspection and raw text extraction views.
+  * 📁 **Collapsible Premium Sidebar**: Responsive stateful sidebar featuring tooltips for collapsed states.
 * **Document Dashboard**: A robust management dashboard to view, filter, sort, and delete your extraction history.
 * **Secure Authentication**: Full JWT-based authentication system with user profiles, allowing secure and private document storage.
+
+---
+
+## ⚙️ Document Processing & Embedding Flow
+
+The system processes documents asynchronously from upload to vectorization using the following multi-stage pipeline:
+
+```mermaid
+graph TD
+    A[User Uploads Document] --> B{Route by File Type}
+    B -- PDF --> C[Docling / PyMuPDF Parser]
+    B -- JPG/JPEG/PNG --> D[PaddleOCR Engine]
+    B -- DOCX --> E[Native XML Paragraph Extractor]
+    B -- TXT/CSV --> F[Plain Text Decoder]
+    
+    C --> G[Page & Layout Block Identification]
+    D --> H[Optical Character Recognition]
+    E --> I[Plain Text Output]
+    F --> I
+    
+    G --> J[Layout-Aware Chunking Engine]
+    H --> K[Fallback Sliding Window Chunker]
+    I --> K
+    
+    J --> L[DB Persistence: Pages & Chunks]
+    K --> L
+    
+    L --> M[Status: ready_for_embedding]
+    
+    subgraph Asynchronous Background Worker
+        N[Embedding Worker Polls DB] --> O[Fetch Chunks]
+        O --> P[Generate Embeddings via MockEmbeddingAdapter]
+        P --> Q[Save Vectors to DB]
+        Q --> R[Status: completed]
+    end
+    
+    M -. Picked up by loop .-> N
+```
+
+### 1. Document Ingestion & Routing
+When a document is uploaded, it is saved in the `uploads/` directory, and the system routes processing based on the file extension:
+* **PDF**: Handled by **DoclingParser** (or falls back to **PyMuPDFParser**). It parses structural elements (paragraphs, tables, lists) alongside page boundaries.
+* **Images (`.jpg`, `.jpeg`, `.png`)**: Handled by **PaddleOCR** (`extract_text_from_image`), which extracts text lines directly.
+* **DOCX**: Handled natively by extracting XML paragraph tags from the docx zip archive.
+* **TXT/CSV**: Handled by a multi-encoding plain text decoder.
+
+### 2. Layout-Aware Chunking
+* **Structural Chunking**: For PDFs, a `LayoutAwareDocumentChunker` splits structural data into logical chunks based on document hierarchy, section headings, and page limits.
+* **Metadata Injection**: Each chunk is decorated with metadata headers for LLM readability:
+  ```text
+  Document: [Filename]
+  Page: [Page Number]
+  Section Path: [Hierarchy Path]
+  ---
+  [Content]
+  ```
+* **Sliding Window Fallback**: If a block exceeds token limits, a token-based sliding window strategy splits it to avoid clipping context.
+
+### 3. Asynchronous Embedding Generation
+* **Database Outbox/Polling**: After chunking, the document transitions to `ready_for_embedding`.
+* **EmbeddingWorker**: A continuous background daemon polls for files in this state, changing their status to `embedding_running` during execution.
+* **MockEmbeddingAdapter**: Generates deterministic, normalized pseudo-random unit vectors using SHA-256 hashes of the text salted with the model name. This produces stable unit Gaussian vectors to support local cosine similarity testing and vector search validation without third-party API dependencies.
 
 ---
 
@@ -28,6 +91,7 @@ A high-throughput REST API built with **FastAPI**.
 * **PyMuPDF (`fitz`)**: Parses digital PDFs instantly and renders pages into high-fidelity preview PNGs.
 * **PaddleOCR (v3.2.2)**: Performs high-accuracy optical character recognition (OCR) on scanned PDFs or raw images.
 * **Auth**: Secure JWT (JSON Web Token) authentication flow for user sessions and password hashing.
+* **Workers**: Run asynchronous task processing loops for embeddings and outbox messages.
 
 ### 2. ⚛️ Frontend Client (`frontend/`)
 An interactive, single-page application focused on premium SaaS aesthetics.

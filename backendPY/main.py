@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from core.config import settings
 from core.logging import logger
 from core.exceptions import register_exception_handlers
-from routes import upload, health, auth, documents, projects, facts
+from routes import upload, health, auth, documents, projects, facts, import_sheet
 
 # Ensure Docling is installed
 try:
@@ -21,6 +21,20 @@ except ImportError:
         logger.info("Docling successfully installed programmatically.")
     except Exception as pip_err:
         logger.error(f"Failed to programmatically install Docling: {str(pip_err)}")
+
+# Ensure openpyxl is installed
+try:
+    import openpyxl
+    logger.info("openpyxl is already installed and verified.")
+except ImportError:
+    logger.warning("openpyxl not detected in python environment. Executing programmatic pip install...")
+    try:
+        import subprocess
+        import sys
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "openpyxl"])
+        logger.info("openpyxl successfully installed programmatically.")
+    except Exception as pip_err:
+        logger.error(f"Failed to programmatically install openpyxl: {str(pip_err)}")
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -56,6 +70,7 @@ api_v1_router.include_router(auth.router, tags=["auth"])
 api_v1_router.include_router(documents.router, tags=["documents"])
 api_v1_router.include_router(projects.router, tags=["projects"])
 api_v1_router.include_router(facts.router, tags=["facts"])
+api_v1_router.include_router(import_sheet.router, tags=["import"])
 
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
@@ -66,6 +81,7 @@ app.include_router(auth.router, tags=["compatibility"])
 app.include_router(documents.router, tags=["compatibility"])
 app.include_router(projects.router, tags=["compatibility"])
 app.include_router(facts.router, tags=["compatibility"])
+app.include_router(import_sheet.router, tags=["compatibility"])
 
 # Health check also at root
 @app.get("/")

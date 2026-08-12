@@ -1,8 +1,9 @@
 import os
 import uuid
 from typing import Optional
-from fastapi import APIRouter, UploadFile, File, Form, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, Form, HTTPException
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -12,54 +13,50 @@ from auth.dependencies import get_current_user
 from core.config import settings
 from core.exceptions import APIException
 from core.logging import logger
-from utils.validation import validate_file
-
+from services.google_sheets_service import GoogleSheetsService, extract_spreadsheet_id
 from services.orchestrator import run_orchestration_pipeline_with_retries
 
 router = APIRouter()
 
-@router.post("/upload", status_code=202)
-async def upload_file(
+class GoogleSheetImportRequest(BaseModel):
+    sheet_url: str
+    project_id: Optional[uuid.UUID] = None
+
+@router.post("/import/google-sheet", status_code=202)
+async def import_google_sheet(
+    request_data: GoogleSheetImportRequest,
     background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
-    project_id: Optional[uuid.UUID] = Form(None),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    logger.info(f"--- Received upload: {file.filename} for user {current_user.id} ---")
-    ext = validate_file(file)
+    logger.info(f"--- Google Sheet Import request: {request_data.sheet_url} for user {current_user.id} ---")
+    
+    # Extract spreadsheet ID and fetch XLSX bytes
+    try:
+        spreadsheet_id = extract_spreadsheet_id(request_data.sheet_url)
+        sheet_bytes = GoogleSheetsService.fetch_public_sheet_as_xlsx(request_data.sheet_url)
+    except ValueError as val_err:
+        raise APIException(status_code=400, detail=str(val_err))
+    except Exception as err:
+        logger.error(f"Google Sheet import fetch failed: {str(err)}")
+        raise APIException(status_code=500, detail=f"Failed to fetch Google Sheet: {str(err)}")
 
-    contents = await file.read()
-    if len(contents) > settings.MAX_FILE_SIZE:
-        raise APIException(
-            status_code=422,
-            detail=f"File size exceeds {settings.MAX_FILE_SIZE // (1024 * 1024)}MB limit"
-        )
-
-    file_id = f"{uuid.uuid4()}.{ext}"
+    # Resolve filename and paths
+    file_name = f"Google_Sheet_{spreadsheet_id[:8]}.xlsx"
+    file_id = f"{uuid.uuid4()}.xlsx"
     file_path = os.path.join(settings.UPLOAD_DIR, file_id)
 
     # Write file to disk
-    with open(file_path, "wb") as f:
-        f.write(contents)
+    try:
+        with open(file_path, "wb") as f:
+            f.write(sheet_bytes)
+    except Exception as io_err:
+        logger.error(f"Failed to write Google Sheet to disk: {str(io_err)}")
+        raise APIException(status_code=500, detail="Failed to save imported file onto server disk.")
 
-    if ext == "pdf":
-        file_type = "pdf"
-    elif ext in ("jpg", "jpeg", "png"):
-        file_type = "image"
-    elif ext == "docx":
-        file_type = "docx"
-    elif ext == "txt":
-        file_type = "text"
-    elif ext in ("xlsx", "xls", "csv"):
-        file_type = "spreadsheet"
-    else:
-        file_type = "unknown"
-
-    # Resolve project context
-    target_project_id = project_id
+    # Resolve project context (identical to upload.py)
+    target_project_id = request_data.project_id
     if target_project_id:
-        # Verify the project exists and user is a member of it
         stmt = select(ProjectMember.project_id).where(
             ProjectMember.project_id == target_project_id,
             ProjectMember.user_id == current_user.id
@@ -75,7 +72,6 @@ async def upload_file(
         target_project_id = res.scalar()
 
         if not target_project_id:
-            # Create a default workspace if none exists
             new_project = Project(
                 id=uuid.uuid4(),
                 name=f"{current_user.username}'s Personal Workspace",
@@ -96,8 +92,8 @@ async def upload_file(
     doc = Document(
         project_id=target_project_id,
         user_id=current_user.id,
-        file_name=file.filename,
-        file_type=file_type,
+        file_name=file_name,
+        file_type="spreadsheet",
         file_path=f"/files/{file_id}",
         status="uploaded"
     )
@@ -105,7 +101,7 @@ async def upload_file(
     await db.commit()
     await db.refresh(doc)
 
-    logger.info(f"Document registered in database with ID: {doc.id}. Queueing orchestration pipeline.")
+    logger.info(f"Google Sheet Document registered with ID: {doc.id}. Queueing orchestration pipeline.")
 
     # Queue background task
     background_tasks.add_task(
@@ -119,7 +115,7 @@ async def upload_file(
         status_code=202,
         content={
             "status": "accepted",
-            "message": "Document uploaded and processing queued successfully.",
+            "message": "Google Sheet URL accepted and processing queued successfully.",
             "document_id": str(doc.id),
             "file_name": doc.file_name,
             "project_id": str(doc.project_id)

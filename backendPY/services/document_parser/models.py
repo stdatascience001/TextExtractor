@@ -8,7 +8,7 @@ class BlockItem(BaseModel):
     document_id: Optional[str] = None
     page_number: int
     parent_block_id: Optional[str] = None
-    type: str  # heading, paragraph, bullet_list, numbered_list, table, image, caption, header, footer, code, quote, formula, footnote
+    type: str  # heading, paragraph, bullet_list, numbered_list, table, image, caption, header, footer, code, quote, formula, footnote, sheet_header, table_row
     text: str
     bbox: Optional[List[float]] = None
     reading_order: int
@@ -17,6 +17,8 @@ class BlockItem(BaseModel):
     source_parser: str
     created_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    image_path: Optional[str] = None
+    table_html: Optional[str] = None
     children: List["BlockItem"] = Field(default_factory=list)
 
     model_config = {

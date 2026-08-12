@@ -56,7 +56,7 @@ function ViewDocumentContent() {
       const data = await api.getDocument(docId);
 
       const formattedData: ExtractedDocument = {
-        fileType: data.file_type as "pdf" | "image" | "docx" | "text",
+        fileType: data.file_type as "pdf" | "image" | "docx" | "text" | "spreadsheet",
         fileName: data.file_name,
         fileUrl: data.file_path,
         status: data.status,
@@ -65,11 +65,25 @@ function ViewDocumentContent() {
         pages: []
       };
 
-      formattedData.pages = [{
-        pageNumber: 1,
-        text: data.result?.full_text || "",
-        imageUrl: data.file_type === "image" ? data.file_path : undefined
-      }];
+      if (data.file_type === "spreadsheet" && data.result?.structured_data?.document?.pages) {
+        formattedData.pages = data.result.structured_data.document.pages.map((p: any) => {
+          const tableItem = p.items?.find((item: any) => item.type === "table");
+          const sheetText = tableItem?.metadata?.rows
+            ? tableItem.metadata.rows.map((row: string[]) => row.join(" | ")).join("\n")
+            : "";
+          return {
+            pageNumber: p.page_number,
+            text: `Sheet: ${p.items?.[0]?.metadata?.sheet_name || ""}\n\n${sheetText}`,
+            imageUrl: undefined
+          };
+        });
+      } else {
+        formattedData.pages = [{
+          pageNumber: 1,
+          text: data.result?.full_text || "",
+          imageUrl: data.file_type === "image" ? data.file_path : undefined
+        }];
+      }
 
       setDocumentData(formattedData);
 
@@ -524,7 +538,11 @@ ${content}`;
             >
               {/* Split view */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
-                <DocumentViewer document={documentData} currentPage={currentPage} />
+                <DocumentViewer 
+                  document={documentData} 
+                  currentPage={currentPage} 
+                  onPageChange={setCurrentPage}
+                />
                 <TextPanel
                   document={documentData}
                   currentPage={currentPage}

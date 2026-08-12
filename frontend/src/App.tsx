@@ -17,6 +17,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Assistant = lazy(() => import("./pages/Assistant"));
 const ProjectList = lazy(() => import("./modules/projects/pages/ProjectList"));
 const ProjectDetail = lazy(() => import("./modules/projects/pages/ProjectDetail"));
+const Knowledge = lazy(() => import("./pages/Knowledge"));
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/knowledge" element={<Knowledge />} />
                 <Route path="/projects" element={<ProjectList />} />
                 <Route path="/projects/:projectId" element={<ProjectDetail />} />
                 <Route path="/projects/:projectId/workspace" element={<Assistant />} />

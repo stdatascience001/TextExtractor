@@ -29,7 +29,7 @@ export interface PageInfo {
 }
 
 export interface ExtractedDocument {
-  fileType: "pdf" | "image" | "docx" | "text";
+  fileType: "pdf" | "image" | "docx" | "text" | "spreadsheet";
   fileName: string;
   fileUrl: string;
   status: string;

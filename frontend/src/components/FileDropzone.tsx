@@ -238,7 +238,7 @@ export interface SelectedDocument {
   file: File;
   fileUrl: string;
   fileName: string;
-  fileType: "pdf" | "image" | "docx" | "text";
+  fileType: "pdf" | "image" | "docx" | "text" | "spreadsheet";
 }
 
 interface FileDropzoneProps {
@@ -255,6 +255,8 @@ const acceptedTypes = {
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
   "text/plain": [".txt"],
   "text/csv": [".csv"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+  "application/vnd.ms-excel": [".xls"],
 };
 
 export function FileDropzone({
@@ -268,13 +270,15 @@ export function FileDropzone({
   // ✅ Create previewable document
   const createDocument = (file: File): SelectedDocument => {
     const ext = file.name.split('.').pop()?.toLowerCase() || "";
-    let type: "pdf" | "image" | "docx" | "text" = "pdf";
+    let type: "pdf" | "image" | "docx" | "text" | "spreadsheet" = "pdf";
     if (file.type.startsWith("image/") || ["jpg", "jpeg", "png"].includes(ext)) {
       type = "image";
     } else if (file.type === "application/pdf" || ext === "pdf") {
       type = "pdf";
     } else if (ext === "docx") {
       type = "docx";
+    } else if (["xlsx", "xls", "csv"].includes(ext)) {
+      type = "spreadsheet";
     } else {
       type = "text";
     }
@@ -288,7 +292,7 @@ export function FileDropzone({
 
   const isValidFile = (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase();
-    const validExtensions = ["pdf", "jpg", "jpeg", "png", "docx", "txt", "csv"];
+    const validExtensions = ["pdf", "jpg", "jpeg", "png", "docx", "txt", "csv", "xlsx", "xls"];
     return Object.keys(acceptedTypes).includes(file.type) || (ext && validExtensions.includes(ext));
   };
 
@@ -323,7 +327,7 @@ export function FileDropzone({
           onFileSelect(createDocument(file));
         } else {
           toast.error("Unsupported file format", {
-            description: "Please upload a PDF, JPG, PNG, DOCX, TXT, or CSV file."
+            description: "Please upload a PDF, JPG, PNG, DOCX, TXT, CSV, or Excel file."
           });
         }
       }
@@ -339,7 +343,7 @@ export function FileDropzone({
           onFileSelect(createDocument(file));
         } else {
           toast.error("Unsupported file format", {
-            description: "Please upload a PDF, JPG, PNG, DOCX, TXT, or CSV file."
+            description: "Please upload a PDF, JPG, PNG, DOCX, TXT, CSV, or Excel file."
           });
         }
       }
@@ -352,8 +356,11 @@ export function FileDropzone({
     if (file.type === "application/pdf" || ext === "pdf") {
       return <FileText className="w-8 h-8" />;
     }
-    if (ext === "docx" || ext === "txt" || ext === "csv") {
+    if (ext === "docx" || ext === "txt") {
       return <FileText className="w-8 h-8 text-blue-500" />;
+    }
+    if (["xlsx", "xls", "csv"].includes(ext || "")) {
+      return <FileText className="w-8 h-8 text-emerald-500" />;
     }
     return <Image className="w-8 h-8" />;
   };
@@ -445,7 +452,7 @@ export function FileDropzone({
             >
               <input
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.docx,.txt,.csv"
+                accept=".pdf,.jpg,.jpeg,.png,.docx,.txt,.csv,.xlsx,.xls"
                 onChange={handleFileInput}
                 title=""
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -469,7 +476,7 @@ export function FileDropzone({
                     : "Drag & drop your document"}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  or click to browse • PDF, JPG, PNG, DOCX, TXT, CSV
+                  or click to browse • PDF, JPG, PNG, DOCX, TXT, CSV, Excel
                 </p>
               </div>
             </motion.label>

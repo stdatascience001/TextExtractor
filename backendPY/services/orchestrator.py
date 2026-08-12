@@ -135,7 +135,41 @@ class OCRServiceAdapter(IOCRService):
                 "text": text,
                 "image_path": ""
             })
-        elif ext in ("txt", "csv"):
+        elif ext in ("xlsx", "xls"):
+            from services.document_parser.spreadsheet_parser import ExcelParser
+            parser = ExcelParser()
+            parsed_doc = parser.parse(file_path, document_id or str(uuid.uuid4()))
+            self.last_parsed_doc = parsed_doc
+            
+            for page in parsed_doc.document.pages:
+                page_text = f"Sheet: {page.items[0].metadata.get('sheet_name', '')}\n" if page.items else ""
+                table_el = next((item for item in page.items if item.type == "table"), None)
+                if table_el:
+                    for row_child in table_el.children:
+                        page_text += f"{row_child.text}\n"
+                pages_data.append({
+                    "page_number": page.page_number,
+                    "text": page_text,
+                    "image_path": ""
+                })
+        elif ext == "csv":
+            from services.document_parser.spreadsheet_parser import CsvParser
+            parser = CsvParser()
+            parsed_doc = parser.parse(file_path, document_id or str(uuid.uuid4()))
+            self.last_parsed_doc = parsed_doc
+            
+            for page in parsed_doc.document.pages:
+                page_text = ""
+                table_el = next((item for item in page.items if item.type == "table"), None)
+                if table_el:
+                    for row_child in table_el.children:
+                        page_text += f"{row_child.text}\n"
+                pages_data.append({
+                    "page_number": page.page_number,
+                    "text": page_text,
+                    "image_path": ""
+                })
+        elif ext == "txt":
             from services.ocr_pipeline import parse_txt_text
             text = parse_txt_text(file_path)
             pages_data.append({

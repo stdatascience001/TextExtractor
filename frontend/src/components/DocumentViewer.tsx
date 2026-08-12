@@ -1,15 +1,18 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Image as ImageIcon, AlertTriangle } from "lucide-react";
 import type { ExtractedDocument } from "@/lib/mockApi";
+import { SpreadsheetRenderer } from "./document_renderer/SpreadsheetRenderer";
 
 interface DocumentViewerProps {
   document: ExtractedDocument;
   currentPage: number;
+  onPageChange?: (page: number) => void;
 }
 
 export function DocumentViewer({
   document,
   currentPage,
+  onPageChange,
 }: DocumentViewerProps) {
   const currentPageData = document.pages[currentPage - 1];
   
@@ -23,6 +26,7 @@ export function DocumentViewer({
   const imageUrl = currentPageData?.imageUrl ? getAbsoluteUrl(currentPageData.imageUrl) : fileUrl;
   const isPdf = document.fileType === "pdf" || document.fileName.toLowerCase().endsWith(".pdf");
   const isImage = document.fileType === "image" || [".jpg", ".jpeg", ".png"].some(ext => document.fileName.toLowerCase().endsWith(ext));
+  const isSpreadsheet = document.fileType === "spreadsheet" || [".xlsx", ".xls", ".csv"].some(ext => document.fileName.toLowerCase().endsWith(ext));
 
   return (
     <motion.div
@@ -56,6 +60,21 @@ export function DocumentViewer({
               transition={{ duration: 0.3 }}
               className="w-full h-full object-contain"
             />
+          ) : isSpreadsheet ? (
+            <motion.div
+              key="spreadsheet-preview"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full"
+            >
+              <SpreadsheetRenderer 
+                document={document} 
+                currentPage={currentPage} 
+                onPageChange={onPageChange}
+              />
+            </motion.div>
           ) : (
             <motion.div
               key="text-preview"

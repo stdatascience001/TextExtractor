@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { FileDropzone, type SelectedDocument } from "@/components/FileDropzone";
+import { GoogleSheetImport } from "@/components/GoogleSheetImport";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { TextPanel } from "@/components/TextPanel";
 import { ErrorMessage } from "@/components/ErrorMessage";
@@ -205,6 +206,9 @@ const Index = () => {
                   selectedFile={selectedFile}
                   onClear={handleClear}
                 />
+
+                {/* Google Sheet Import */}
+                <GoogleSheetImport />
 
                 {/* Error message */}
                 <AnimatePresence>

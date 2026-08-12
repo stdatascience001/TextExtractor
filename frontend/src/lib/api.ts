@@ -238,6 +238,71 @@ export const api = {
     });
     if (!res.ok) throw new Error("Failed to fetch document status metadata");
     return res.json();
+  },
+
+  // Facts / Knowledge base endpoints
+  async getProjectFacts(projectId: string) {
+    const res = await fetchWithTimeout(`${API_URL}/projects/${projectId}/facts/review`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to fetch project facts");
+    return res.json();
+  },
+
+  async approveFact(factId: string) {
+    const res = await fetchWithTimeout(`${API_URL}/facts/${factId}/approve`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to approve fact");
+    return res.json();
+  },
+
+  async rejectFact(factId: string) {
+    const res = await fetchWithTimeout(`${API_URL}/facts/${factId}/reject`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to reject fact");
+    return res.json();
+  },
+
+  async modifyFact(factId: string, predicate: string, objectText: string) {
+    const res = await fetchWithTimeout(`${API_URL}/facts/${factId}/modify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ predicate, object_text: objectText }),
+    });
+    if (!res.ok) throw new Error("Failed to modify fact");
+    return res.json();
+  },
+
+  async undoFactAction(factId: string) {
+    const res = await fetchWithTimeout(`${API_URL}/facts/${factId}/undo`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to undo last fact action");
+    return res.json();
+  },
+
+  async importGoogleSheet(sheetUrl: string, projectId?: string) {
+    const res = await fetchWithTimeout(`${API_URL}/import/google-sheet`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ sheet_url: sheetUrl, project_id: projectId }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Failed to import Google Sheet" }));
+      throw new Error(err.detail || "Failed to import Google Sheet");
+    }
+    return res.json();
   }
 };
 
