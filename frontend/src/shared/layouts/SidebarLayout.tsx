@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Tooltip } from "@/components/ui/Tooltip";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -14,8 +15,12 @@ import {
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 interface SidebarLayoutProps {
   children?: React.ReactNode;
@@ -25,6 +30,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   const { user, logout, isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   const [isCollapsed, setIsCollapsed] = React.useState(() => {
     if (typeof window !== "undefined") {
@@ -56,7 +62,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
     { name: "Knowledge", path: "/knowledge", icon: Database },
     { name: "Search", path: "/search", icon: Search },
     { name: "Reports", path: "/reports", icon: BarChart3 },
-    { name: "Settings", path: "/profile", icon: Settings },
+    { name: "Settings", path: "/settings", icon: Settings },
   ];
 
   const handleLogout = async () => {
@@ -88,17 +94,18 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
             )}
           </div>
 
-          <button
-            onClick={toggleSidebar}
-            className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors duration-200"
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {isCollapsed ? (
-              <PanelLeftOpen className="w-4 h-4" />
-            ) : (
-              <PanelLeftClose className="w-4 h-4" />
-            )}
-          </button>
+          <Tooltip content={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"} description={isCollapsed ? "Show navigation labels" : "Hide navigation labels"} position="right">
+            <button
+              onClick={toggleSidebar}
+              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors duration-200"
+            >
+              {isCollapsed ? (
+                <PanelLeftOpen className="w-4 h-4" />
+              ) : (
+                <PanelLeftClose className="w-4 h-4" />
+              )}
+            </button>
+          </Tooltip>
         </div>
 
         {/* Navigation Items */}
@@ -109,9 +116,18 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                 ? location.pathname === "/"
                 : location.pathname.startsWith(item.path);
 
-            return (
+            const sidebarTooltipDescription = {
+              "Dashboard": "View metrics, upload documents, and track parsing history.",
+              "Projects": "Organize your documents, members, and custom vector search contexts.",
+              "Documents": "Access, filter, and delete all extracted files.",
+              "Knowledge": "Verify, edit, or reject structured facts extracted from your documents.",
+              "Search": "Search through raw document content and parsed text.",
+              "Reports": "Review usage analytics, counts, and extraction patterns.",
+              "Settings": "Configure your account details, preferences, and security."
+            }[item.name] || `Go to ${item.name}`;
+
+            const linkElement = (
               <Link
-                key={item.name}
                 to={item.path}
                 className={cn(
                   "flex items-center rounded-lg text-sm font-medium transition-all duration-200 group relative",
@@ -120,64 +136,147 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                     ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
-                title={isCollapsed ? item.name : undefined}
               >
                 <item.icon className="w-4 h-4 flex-shrink-0" />
                 {!isCollapsed && <span className="transition-all duration-200 whitespace-nowrap">{item.name}</span>}
-
-                {/* Premium hover tooltip for collapsed state */}
-                {isCollapsed && (
-                  <span className="absolute left-14 bg-popover text-popover-foreground text-xs font-semibold px-2.5 py-1.5 rounded-md border border-border shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 pointer-events-none transition-all duration-150 z-50 whitespace-nowrap">
-                    {item.name}
-                  </span>
-                )}
               </Link>
+            );
+
+            return (
+              <React.Fragment key={item.name}>
+                {isCollapsed ? (
+                  <Tooltip content={item.name} description={sidebarTooltipDescription} position="right">
+                    {linkElement}
+                  </Tooltip>
+                ) : (
+                  linkElement
+                )}
+              </React.Fragment>
             );
           })}
         </nav>
 
         {/* User Account / Footer */}
         <div className={cn("border-t border-border bg-card/30 transition-all duration-300", isCollapsed ? "p-2" : "p-4")}>
-          <div className={cn(
-            "flex items-center rounded-lg bg-muted/35 mb-2 transition-all duration-300 group relative",
-            isCollapsed ? "justify-center p-2" : "gap-3 px-2 py-2"
-          )}>
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center text-primary text-xs font-semibold uppercase">
-              {user?.username?.substring(0, 2) || "US"}
-            </div>
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0 transition-all duration-200">
-                <p className="text-xs font-semibold text-foreground truncate">{user?.username || "Guest User"}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{user?.email || "guest@example.com"}</p>
-              </div>
-            )}
+          {(() => {
+            const userCardElement = (
+              <Link
+                to="/profile"
+                className={cn(
+                  "flex items-center rounded-lg bg-muted/35 hover:bg-muted/65 mb-2 transition-all duration-300 group relative border border-transparent hover:border-border/35",
+                  isCollapsed ? "justify-center p-2" : "gap-3 px-2 py-2"
+                )}
+              >
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center text-primary text-xs font-semibold uppercase group-hover:scale-105 transition-transform duration-300">
+                  {user?.username?.substring(0, 2) || "US"}
+                </div>
+                {!isCollapsed && (
+                  <div className="flex-1 min-w-0 transition-all duration-200">
+                    <p className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">{user?.username || "Guest User"}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{user?.email || "guest@example.com"}</p>
+                  </div>
+                )}
+              </Link>
+            );
 
-            {/* Hover details for collapsed user */}
-            {isCollapsed && (
-              <div className="absolute left-14 bg-popover text-popover-foreground text-xs font-semibold p-2.5 rounded-md border border-border shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 pointer-events-none transition-all duration-150 z-50 whitespace-nowrap flex flex-col gap-0.5">
-                <p className="font-semibold text-foreground">{user?.username || "Guest User"}</p>
-                <p className="text-[10px] text-muted-foreground font-normal">{user?.email || "guest@example.com"}</p>
-              </div>
-            )}
-          </div>
-          <button
-            onClick={handleLogout}
-            className={cn(
-              "flex items-center rounded-lg text-xs font-medium text-red-500 hover:bg-red-50/10 hover:text-red-600 transition-colors group relative",
-              isCollapsed ? "justify-center p-2.5 w-full" : "gap-3 px-4 py-2 w-full"
-            )}
-            title={isCollapsed ? "Sign Out" : undefined}
-          >
-            <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
-            {!isCollapsed && <span>Sign Out</span>}
+            const signOutElement = (
+              <button
+                onClick={handleLogout}
+                className={cn(
+                  "flex items-center rounded-lg text-xs font-medium text-red-500 hover:bg-red-50/10 hover:text-red-600 transition-colors group relative",
+                  isCollapsed ? "justify-center p-2.5 w-full" : "gap-3 px-4 py-2 w-full"
+                )}
+              >
+                <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+                {!isCollapsed && <span>Sign Out</span>}
+              </button>
+            );
 
-            {/* Tooltip for Sign Out in collapsed state */}
-            {isCollapsed && (
-              <span className="absolute left-14 bg-popover text-red-600 text-xs font-semibold px-2.5 py-1.5 rounded-md border border-border shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 pointer-events-none transition-all duration-150 z-50 whitespace-nowrap">
-                Sign Out
-              </span>
-            )}
-          </button>
+            const themeToggleElement = (
+              <div className={cn(
+                "flex items-center gap-1 mb-2 bg-muted/20 p-1 rounded-lg border border-border/20 transition-all duration-300",
+                isCollapsed ? "flex-col p-1 border-none bg-transparent animate-fade-in" : "flex-row justify-between animate-fade-in"
+              )}>
+                {isCollapsed ? (
+                  <Tooltip content="Toggle Theme" description={`Active: ${theme || "system"}`} position="right">
+                    <button
+                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                      className="w-8 h-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-all duration-200 border border-border/30 bg-muted/40"
+                    >
+                      <Sun className="w-4 h-4 dark:hidden text-amber-500 animate-pulse-soft" />
+                      <Moon className="w-4 h-4 hidden dark:block text-blue-400 animate-pulse-soft" />
+                    </button>
+                  </Tooltip>
+                ) : (
+                  <>
+                    <Tooltip content="Light Theme" description="Switch to light interface" position="right">
+                      <button
+                        onClick={() => setTheme("light")}
+                        className={cn(
+                          "flex-1 py-1 rounded-md flex items-center justify-center gap-1 transition-all duration-200 text-[9px] font-bold uppercase tracking-wider",
+                          theme === "light"
+                            ? "bg-background text-primary shadow-sm border border-border/50"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                        )}
+                      >
+                        <Sun className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Light</span>
+                      </button>
+                    </Tooltip>
+                    <Tooltip content="Dark Theme" description="Switch to dark interface" position="right">
+                      <button
+                        onClick={() => setTheme("dark")}
+                        className={cn(
+                          "flex-1 py-1 rounded-md flex items-center justify-center gap-1 transition-all duration-200 text-[9px] font-bold uppercase tracking-wider",
+                          theme === "dark"
+                            ? "bg-background text-primary shadow-sm border border-border/50"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                        )}
+                      >
+                        <Moon className="w-3.5 h-3.5 text-blue-400" />
+                        <span>Dark</span>
+                      </button>
+                    </Tooltip>
+                    <Tooltip content="System Preference" description="Follow your OS style settings" position="right">
+                      <button
+                        onClick={() => setTheme("system")}
+                        className={cn(
+                          "flex-1 py-1 rounded-md flex items-center justify-center gap-1 transition-all duration-200 text-[9px] font-bold uppercase tracking-wider",
+                          theme === "system"
+                            ? "bg-background text-primary shadow-sm border border-border/50"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                        )}
+                      >
+                        <Monitor className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Sys</span>
+                      </button>
+                    </Tooltip>
+                  </>
+                )}
+              </div>
+            );
+
+            return (
+              <>
+                {themeToggleElement}
+                {isCollapsed ? (
+                  <Tooltip content={user?.username || "Guest User"} description={user?.email || "guest@example.com"} position="right">
+                    {userCardElement}
+                  </Tooltip>
+                ) : (
+                  userCardElement
+                )}
+
+                {isCollapsed ? (
+                  <Tooltip content="Sign Out" description="Sign out of your active session." position="right">
+                    {signOutElement}
+                  </Tooltip>
+                ) : (
+                  signOutElement
+                )}
+              </>
+            );
+          })()}
         </div>
       </aside>
 

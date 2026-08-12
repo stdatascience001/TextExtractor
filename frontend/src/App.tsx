@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -14,6 +15,7 @@ const Register = lazy(() => import("./pages/Register"));
 const MyDocuments = lazy(() => import("./pages/MyDocuments"));
 const ViewDocument = lazy(() => import("./pages/ViewDocument"));
 const Profile = lazy(() => import("./pages/Profile"));
+const Settings = lazy(() => import("./pages/Settings"));
 const Assistant = lazy(() => import("./pages/Assistant"));
 const ProjectList = lazy(() => import("./modules/projects/pages/ProjectList"));
 const ProjectDetail = lazy(() => import("./modules/projects/pages/ProjectDetail"));
@@ -23,9 +25,10 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AnimationProvider>
-        <Toaster />
-        <Sonner />
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <AnimationProvider>
+          <Toaster />
+          <Sonner />
         <AuthProvider>
           <BrowserRouter>
             <Suspense fallback={
@@ -38,6 +41,7 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="/knowledge" element={<Knowledge />} />
                 <Route path="/projects" element={<ProjectList />} />
                 <Route path="/projects/:projectId" element={<ProjectDetail />} />
@@ -51,7 +55,8 @@ const App = () => (
             </Suspense>
           </BrowserRouter>
         </AuthProvider>
-    </AnimationProvider>
+      </AnimationProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

@@ -132,25 +132,74 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(({
 
       {/* Input Container */}
       <div
-        className={`relative border border-border rounded-xl flex items-center px-3 py-2 transition-all ${
-          isDragging
-            ? 'border-primary bg-primary/5'
-            : 'bg-background hover:border-slate-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`relative group border border-border rounded-xl flex items-center px-3 py-2 transition-all ${isDragging
+          ? 'border-primary bg-primary/5'
+          : 'bg-background hover:border-slate-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20'
+          } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
+        {/* Animated Border Beam */}
+        {!disabled && !isDragging && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            <svg className="absolute inset-0 w-full h-full" fill="none">
+              {/* Glow Layer */}
+              <rect
+                x={1}
+                y={1}
+                rx={11}
+                style={{
+                  width: "calc(100% - 2px)",
+                  height: "calc(100% - 2px)",
+                  strokeDasharray: "10 90",
+                  animation: "border-beam-anim 2.5s linear infinite",
+                  filter: "blur(1px)",
+                  opacity: 0.5
+                }}
+                className="stroke-blue-900 dark:stroke-white"
+                strokeWidth="1"
+                pathLength="100"
+              />
+              {/* Sharp Line Layer */}
+              {/* <rect
+                x={1}
+                y={1}
+                rx={11}
+                style={{
+                  width: "calc(100% - 2px)",
+                  height: "calc(100% - 2px)",
+                  strokeDasharray: "10 90",
+                  animation: "border-beam-anim 1.5s linear infinite"
+                }}
+                className="stroke-blue-600 dark:stroke-white"
+                strokeWidth="1.5"
+                pathLength="100"
+              /> */}
+            </svg>
+            <style>{`
+              @keyframes border-beam-anim {
+                from {
+                  stroke-dashoffset: 0;
+                }
+                to {
+                  stroke-dashoffset: -100;
+                }
+              }
+            `}</style>
+          </div>
+        )}
+
         <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
-            disabled={disabled}
-            onClick={() => toast.info('File attachment feature coming soon')}
-            aria-label="Attach file"
-          >
-            <Paperclip className="h-4 w-4" />
-          </Button>
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0 relative z-10"
+          disabled={disabled}
+          onClick={() => toast.info('File attachment feature coming soon')}
+          aria-label="Attach file"
+        >
+          <Paperclip className="h-4 w-4" />
+        </Button>
 
         <Textarea
           ref={setRef}
@@ -163,36 +212,36 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(({
           placeholder={placeholder}
           disabled={disabled}
           maxLength={maxLength}
-          className="flex-1 min-h-[40px] max-h-[160px] py-1.5 px-3 resize-none border-0 focus-visible:ring-0 bg-transparent text-sm focus-visible:ring-offset-0 focus:outline-none"
+          className="flex-1 min-h-[40px] max-h-[160px] py-1.5 px-3 resize-none border-0 focus-visible:ring-0 bg-transparent text-sm focus-visible:ring-offset-0 focus:outline-none relative z-10"
           rows={1}
           aria-label="Chat input"
           aria-describedby="character-count"
         />
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0 relative z-10">
           {value.length > 0 && (
             <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                onClick={() => onChange('')}
-                disabled={disabled}
-                aria-label="Clear input"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              onClick={() => onChange('')}
+              disabled={disabled}
+              aria-label="Clear input"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           )}
 
           <Button
-              size="sm"
-              className="h-8 px-4 rounded-lg bg-primary hover:bg-primary/90 text-white font-medium text-xs shadow-sm transition-colors shrink-0"
-              disabled={disabled || !value.trim()}
-              onClick={onSend}
-              aria-label="Send message"
-            >
-              send
-            </Button>
+            size="sm"
+            className="h-8 px-4 rounded-lg bg-primary hover:bg-primary/90 text-white font-medium text-xs shadow-sm transition-colors shrink-0"
+            disabled={disabled || !value.trim()}
+            onClick={onSend}
+            aria-label="Send message"
+          >
+            send
+          </Button>
         </div>
       </div>
 
@@ -204,7 +253,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(({
           )}
         </div>
         {value.length > 0 && (
-          <div 
+          <div
             id="character-count"
             className={`text-xs ${isNearLimit ? 'text-destructive' : 'text-muted-foreground'}`}
           >

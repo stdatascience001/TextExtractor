@@ -24,6 +24,7 @@ import {
 } from "../hooks/useProjects";
 import { Project } from "../types";
 import { SidebarLayout } from "@/shared/layouts/SidebarLayout";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,8 +100,12 @@ export const ProjectList: React.FC = () => {
   }, [editingProject, setValue, reset]);
 
   const onCreateSubmit = async (values: ProjectFormValues) => {
+    if (!values.name) return;
     try {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync({
+        name: values.name,
+        description: values.description,
+      });
       toast.success("Project Created Successfully");
       setIsCreateOpen(false);
       reset();
@@ -239,22 +244,26 @@ export const ProjectList: React.FC = () => {
                 </CardContent>
                 <CardFooter className="flex items-center justify-between border-t border-border/65 pt-4 mt-4 bg-muted/10">
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-8 h-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
-                      onClick={() => setEditingProject(project)}
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-8 h-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50/10"
-                      onClick={() => setDeletingProjectId(project.id)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
+                    <Tooltip content="Edit Project" position="top">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-8 h-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
+                        onClick={() => setEditingProject(project)}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip content="Delete Project" position="top">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-8 h-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50/10"
+                        onClick={() => setDeletingProjectId(project.id)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </Tooltip>
                   </div>
                   <Button
                     size="sm"

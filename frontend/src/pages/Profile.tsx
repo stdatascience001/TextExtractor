@@ -3,25 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../lib/api";
 import { useToast } from "../components/ui/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../components/ui/alert-dialog";
-import { LogoutButton } from "../components/LogoutButton";
 import { motion } from "framer-motion";
-import { User as UserIcon, Lock, Trash2, ArrowLeft, Loader2, Save } from "lucide-react";
+import { User as UserIcon, Loader2, Save, ArrowRight, Settings as SettingsIcon } from "lucide-react";
 import { format } from "date-fns";
 import { SidebarLayout } from "@/shared/layouts/SidebarLayout";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 export default function Profile() {
-  const { user, logout, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -32,15 +21,9 @@ export default function Profile() {
   const [username, setUsername] = useState("");
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-
-  const [isDeleting, setIsDeleting] = useState(false);
-
   useEffect(() => {
     if (isAuthLoading) return;
-    
+
     if (!isAuthenticated) {
       navigate("/login");
       return;
@@ -69,40 +52,10 @@ export default function Profile() {
       await api.updateUsername(username);
       setProfileData({ ...profileData, username });
       toast({ title: "Success", description: "Username updated successfully." });
-      // The context will update on next reload or we could update it manually, 
-      // but for this simple app, it's fine.
     } catch (err: any) {
       toast({ variant: "destructive", title: "Update Failed", description: err.message });
     } finally {
       setIsUpdatingUsername(false);
-    }
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsUpdatingPassword(true);
-    try {
-      await api.changePassword(currentPassword, newPassword);
-      setCurrentPassword("");
-      setNewPassword("");
-      toast({ title: "Success", description: "Password changed successfully." });
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Password Change Failed", description: err.message });
-    } finally {
-      setIsUpdatingPassword(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    setIsDeleting(true);
-    try {
-      await api.deleteAccount();
-      toast({ title: "Account Deleted", description: "Your account and all data have been permanently removed." });
-      logout();
-      navigate("/");
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Deletion Failed", description: err.message });
-      setIsDeleting(false);
     }
   };
 
@@ -124,32 +77,68 @@ export default function Profile() {
     );
   }
 
+  // Generate a random-like theme color based on username initials for the avatar background
+  const initials = user?.username?.substring(0, 2).toUpperCase() || "US";
+
   return (
     <SidebarLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-4xl">
+        {/* Profile Header Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
+          className="relative bg-card border border-border p-6 rounded-2xl shadow-sm overflow-hidden flex flex-col md:flex-row items-center gap-6"
+        >
+          {/* Decorative background glow */}
+          <div className="absolute -bottom-24 -left-24 w-52 h-52 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white text-2xl font-black shadow-glow z-10 shrink-0 select-none">
+            {initials}
+          </div>
+          <div className="flex-1 text-center md:text-left z-10">
+            <h1 className="text-3xl font-black text-foreground tracking-tight">{profileData?.username || "User Profile"}</h1>
+            <p className="text-sm text-muted-foreground mt-1 font-medium">{profileData?.email || "Email unavailable"}</p>
+            <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
+              <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/10 rounded-md">
+                Active Member
+              </span>
+            </div>
+          </div>
+          <div className="z-10 mt-4 md:mt-0">
+            <Tooltip content="Go to Settings" description="Configure theme, password, or delete account">
+              <Link
+                to="/settings"
+                className="px-4 py-2 border border-border bg-background text-foreground hover:bg-muted text-sm font-semibold rounded-xl transition-all duration-300 flex items-center gap-2 shadow-sm"
+              >
+                <SettingsIcon className="w-4 h-4" />
+                <span>Account Settings</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </Tooltip>
+          </div>
+        </motion.div>
 
         {/* Statistics Section */}
         <motion.section
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
           className="bg-card border border-border p-6 rounded-2xl shadow-sm"
         >
-          <h2 className="text-xl font-bold text-foreground mb-6">Overview</h2>
+          <h2 className="text-xl font-bold text-foreground mb-6">Overview & Usage</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-4 bg-muted/50 rounded-xl">
-              <div className="text-sm text-muted-foreground mb-1">Member Since</div>
-              <div className="text-lg font-semibold text-foreground">
+            <div className="p-4 bg-muted/40 rounded-xl border border-border/50">
+              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Member Since</div>
+              <div className="text-xl font-extrabold text-foreground">
                 {profileData?.created_at ? format(new Date(profileData.created_at), "MMMM yyyy") : "Unknown"}
               </div>
             </div>
-            <div className="p-4 bg-muted/50 rounded-xl">
-              <div className="text-sm text-muted-foreground mb-1">Total Documents</div>
-              <div className="text-lg font-semibold text-foreground">
+            <div className="p-4 bg-muted/40 rounded-xl border border-border/50">
+              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Total Documents</div>
+              <div className="text-xl font-extrabold text-foreground">
                 {profileData?.total_documents || 0}
               </div>
             </div>
-            <div className="p-4 bg-muted/50 rounded-xl">
-              <div className="text-sm text-muted-foreground mb-1">Storage Used</div>
-              <div className="text-lg font-semibold text-foreground">
+            <div className="p-4 bg-muted/40 rounded-xl border border-border/50">
+              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Storage Used</div>
+              <div className="text-xl font-extrabold text-foreground">
                 {formatBytes(profileData?.storage_used_bytes || 0)}
               </div>
             </div>
@@ -186,7 +175,8 @@ export default function Profile() {
                 className="w-full p-2.5 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               />
             </div>
-            <button
+            <Tooltip content="Save Changes" description="Save your updated username">
+              <button
                 type="submit"
                 disabled={isUpdatingUsername || username === profileData?.username}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -194,97 +184,9 @@ export default function Profile() {
                 {isUpdatingUsername ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes
               </button>
+            </Tooltip>
           </form>
         </motion.section>
-
-        {/* Password Update Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="bg-card border border-border p-6 rounded-2xl shadow-sm"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <Lock className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-bold text-foreground">Change Password</h2>
-          </div>
-          <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Current Password</label>
-              <input
-                type="password"
-                required
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">New Password</label>
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-              />
-            </div>
-            <button
-                type="submit"
-                disabled={isUpdatingPassword || !currentPassword || !newPassword}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                {isUpdatingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Update Password
-              </button>
-          </form>
-        </motion.section>
-
-        {/* Danger Zone */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="border border-destructive/30 bg-destructive/5 p-6 rounded-2xl shadow-sm"
-        >
-          <div className="flex items-center gap-3 mb-2">
-            <Trash2 className="w-5 h-5 text-destructive" />
-            <h2 className="text-xl font-bold text-destructive">Danger Zone</h2>
-          </div>
-          <p className="text-sm text-muted-foreground mb-6">
-            Permanently delete your account and all associated documents. This action is irreversible.
-          </p>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button
-                disabled={isDeleting}
-                className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg text-sm font-medium hover:bg-destructive/90 transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                {/* Delete button content */}
-                <div className="flex items-center gap-2">
-                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                    Delete Account
-                  </div>
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently erase ALL your saved documents and data. This action CANNOT be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="bg-transparent border border-input hover:bg-slate-100 hover:text-slate-900 transition-colors">Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteAccount}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Yes, delete my account
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </motion.section>
-
       </div>
     </SidebarLayout>
   );

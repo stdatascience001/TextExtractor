@@ -3,6 +3,7 @@ import { Link2, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { Tooltip } from "./ui/Tooltip";
 
 export function GoogleSheetImport() {
   const [url, setUrl] = useState("");
@@ -77,20 +78,22 @@ export function GoogleSheetImport() {
             className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-muted/60 border border-transparent focus:border-emerald-500/50 focus:bg-background outline-none transition-all text-xs"
           />
         </div>
-        <button
-          type="submit"
-          disabled={isLoading || !url.trim()}
-          className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-muted disabled:text-muted-foreground text-white text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-2 duration-150 active:scale-95 cursor-pointer shrink-0"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Importing...
-            </>
-          ) : (
-            "Import"
-          )}
-        </button>
+        <Tooltip content="Import Sheet Data" position="top">
+          <button
+            type="submit"
+            disabled={isLoading || !url.trim()}
+            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-muted disabled:text-muted-foreground text-white text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-2 duration-150 active:scale-95 cursor-pointer shrink-0"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Importing...
+              </>
+            ) : (
+              "Import"
+            )}
+          </button>
+        </Tooltip>
       </form>
 
       <div className="flex items-start gap-2 text-[10px] text-muted-foreground bg-muted/40 p-3 rounded-xl border border-border/40">

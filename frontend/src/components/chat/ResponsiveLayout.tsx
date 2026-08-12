@@ -30,7 +30,7 @@ export function ResponsiveLayout({ sidebar, main, rightPanel }: ResponsiveLayout
   // Mobile layout - use sheets/drawers
   if (isMobile) {
     return (
-      <div className="h-screen flex flex-col">
+      <div className="h-screen flex flex-col dark:bg-zinc-950">
         {/* Mobile Header */}
         <div className="flex items-center justify-between p-4 border-b border-border bg-background">
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -69,7 +69,7 @@ export function ResponsiveLayout({ sidebar, main, rightPanel }: ResponsiveLayout
   // Tablet layout - collapsible panels
   if (isTablet) {
     return (
-      <ResizablePanelGroup direction="horizontal" className="h-screen overflow-hidden p-3 gap-3 bg-slate-50">
+      <ResizablePanelGroup direction="horizontal" className="h-screen overflow-hidden p-3 gap-3 dark:bg-zinc-950">
         <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
           <div className="h-full overflow-hidden flex flex-col border border-border rounded-2xl bg-card shadow-sm">
             {sidebar}
@@ -97,7 +97,7 @@ export function ResponsiveLayout({ sidebar, main, rightPanel }: ResponsiveLayout
 
   // Desktop layout - full resizable panels
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-screen overflow-hidden p-3 gap-3 bg-slate-50">
+    <ResizablePanelGroup direction="horizontal" className="h-screen overflow-hidden p-3 gap-3 dark:bg-zinc-950">
       <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
         <div className="h-full overflow-hidden flex flex-col border border-border rounded-2xl bg-card shadow-sm">
           {sidebar}

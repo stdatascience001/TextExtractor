@@ -10,6 +10,7 @@ import { Loader2, ArrowLeft, Download, FileText, Code, Table, X, Check, RefreshC
 import { ExtractedDocument } from "../lib/mockApi";
 import { DocumentStatusProvider, useDocumentStatusContext } from "../contexts/DocumentStatusContext";
 import { INGESTION_STAGES } from "../lib/DocumentLifecycle";
+import { Tooltip } from "../components/ui/Tooltip";
 
 export default function ViewDocument() {
   const { id } = useParams<{ id: string }>();
@@ -472,54 +473,66 @@ ${content}`;
           </div>
 
           <div className="flex bg-muted/60 p-1 rounded-xl border border-border">
-            <button
-              onClick={() => setViewMode("viewer")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === "viewer"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              <Eye className="w-3.5 h-3.5 text-primary" /> Split Viewer
-            </button>
-            <button
-              onClick={() => setViewMode("extraction")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === "extraction"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-                }`}
-            >
-              <Cpu className="w-3.5 h-3.5 text-primary" /> Extraction Monitor
-            </button>
+            <Tooltip content="Split Viewer" description="Compare original document alongside extracted data" position="bottom">
+              <button
+                onClick={() => setViewMode("viewer")}
+                className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === "viewer"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                <Eye className="w-3.5 h-3.5 text-primary" /> Split Viewer
+              </button>
+            </Tooltip>
+            <Tooltip content="Extraction Monitor" description="Inspect raw elements and OCR parsing hierarchy" position="bottom">
+              <button
+                onClick={() => setViewMode("extraction")}
+                className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${viewMode === "extraction"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                <Cpu className="w-3.5 h-3.5 text-primary" /> Extraction Monitor
+              </button>
+            </Tooltip>
           </div>
 
           <div className="flex items-center gap-2">
-            <Link
+            <Tooltip content="Chat Workspace" description="Ask questions and query details from this document" position="bottom">
+              <Link
                 to={`/documents/${id}/workspace`}
                 className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-all border border-indigo-700 shadow duration-150 active:scale-95"
               >
                 <MessageSquare className="w-4.5 h-4.5" /> Chat
               </Link>
+            </Tooltip>
 
-            <button
+            <Tooltip content="Export TXT" description="Download parsed raw text transcript" position="bottom">
+              <button
                 onClick={() => handleExport("text")}
                 className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted text-sm font-medium rounded-lg transition-colors border border-border"
               >
                 <FileText className="w-4 h-4 text-primary" /> TXT
               </button>
+            </Tooltip>
 
-            <button
+            <Tooltip content="Export JSON" description="Download structured layout and metadata mapping" position="bottom">
+              <button
                 onClick={() => handleExport("json")}
                 className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted text-sm font-medium rounded-lg transition-colors border border-border"
               >
                 <Code className="w-4 h-4 text-primary" /> JSON
               </button>
+            </Tooltip>
 
-            <button
+            <Tooltip content="Export CSV" description="Download tabular spreadsheet extracts" position="bottom">
+              <button
                 onClick={() => handleExport("csv")}
                 className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted text-sm font-medium rounded-lg transition-colors border border-border"
               >
                 <Table className="w-4 h-4 text-primary" /> CSV
               </button>
+            </Tooltip>
           </div>
         </div>
       </header>
