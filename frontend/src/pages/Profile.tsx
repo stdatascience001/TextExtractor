@@ -71,7 +71,7 @@ export default function Profile() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <img src="/favicon1.png" alt="Loading..." className="w-10 h-10 animate-spin" />
         </div>
       </div>
     );

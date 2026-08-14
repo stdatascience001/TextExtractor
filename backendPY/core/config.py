@@ -13,7 +13,7 @@ class Settings(BaseSettings):
         extra="ignore"
     )
     
-    APP_NAME: str = "DocExtract"
+    APP_NAME: str = "DocLens"
     APP_ENV: str = "development"
     API_V1_STR: str = "/api/v1"
     UPLOAD_DIR: str = "uploads"
@@ -27,6 +27,14 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     USE_DOCLING: bool = True
+    
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = "st.tech321@gmail.com"
+    SMTP_PASS: str = "mkebugsyqvzkztkn"
+    SMTP_FROM: str = "st.tech321@gmail.com"
+    BACKEND_URL: str = "http://localhost:8000"
+    FRONTEND_URL: str = "http://localhost:5173"
 
     @property
     def cors_origins_list(self) -> List[str]:

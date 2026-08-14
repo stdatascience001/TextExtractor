@@ -88,7 +88,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
             </div>
             {!isCollapsed && (
               <div className="transition-all duration-300 whitespace-nowrap">
-                <h1 className="text-sm font-semibold text-foreground leading-none">DocExtract</h1>
+                <h1 className="text-sm font-semibold text-foreground leading-none">DocLens</h1>
                 <span className="text-[10px] text-muted-foreground">Knowledge Engine</span>
               </div>
             )}
@@ -288,7 +288,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
             <div className="w-8 h-8 flex items-center justify-center bg-primary/10 rounded-lg">
               <img src="/favicon1.png" alt="Logo" className="w-6 h-6 object-contain" />
             </div>
-            <h1 className="text-sm font-semibold text-foreground">DocExtract</h1>
+            <h1 className="text-sm font-semibold text-foreground">DocLens</h1>
           </div>
           <button className="p-2 rounded-md hover:bg-muted text-muted-foreground">
             <Menu className="w-5 h-5" />

@@ -23,7 +23,7 @@ export default function Register() {
       const tokens = await api.register({ username, email, password });
       await login(tokens);
       
-      toast({ title: "Account created", description: "Welcome to DocExtract!" });
+      toast({ title: "Account created", description: "Welcome to DocLens!" });
       navigate("/");
     } catch (err: any) {
       toast({

@@ -32,8 +32,9 @@ const App = () => (
         <AuthProvider>
           <BrowserRouter>
             <Suspense fallback={
-              <div className="h-screen w-screen flex items-center justify-center bg-background text-muted-foreground font-medium">
-                Loading...
+              <div className="h-screen w-screen flex flex-col items-center justify-center bg-background text-muted-foreground font-medium">
+                <img src="/favicon1.png" alt="Loading DocLens..." className="w-16 h-16 animate-spin mb-4" />
+                <p className="text-sm">Loading DocLens...</p>
               </div>
             }>
               <Routes>

@@ -380,6 +380,26 @@ class DocumentOrchestrator:
                 payload={"document_id": str(doc.id), "pages_count": len(pages_data)}
             ))
             await db.commit()
+
+            # Send email to the user with the private link of the extracted text on the frontend
+            try:
+                from models.models import User
+                from core.config import settings
+                from utils.email import send_extracted_text_email
+
+                stmt_user = select(User).where(User.id == doc.user_id)
+                res_user = await db.execute(stmt_user)
+                user = res_user.scalar_one_or_none()
+
+                if user and user.email:
+                    base_url = settings.FRONTEND_URL.rstrip('/')
+                    private_link = f"{base_url}/documents/{doc.id}"
+                    await send_extracted_text_email(user.email, doc.file_name, private_link, user.username)
+                    logger.info(f"Triggered extraction complete email to {user.email} (Username: {user.username}) for doc {doc.id}")
+                else:
+                    logger.warning(f"User not found or user email missing for document {doc.id}")
+            except Exception as mail_err:
+                logger.error(f"Failed to send extraction complete email for document {doc.id}: {str(mail_err)}")
         except Exception as e:
             await db.rollback()
             stack_trace = traceback.format_exc()

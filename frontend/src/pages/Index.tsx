@@ -137,7 +137,7 @@ const Index = () => {
                   <img src="/favicon1.png" alt="Logo" className="w-full h-full object-contain p-1" />
                 </motion.div>
                 <div>
-                  <h1 className="text-lg font-semibold text-foreground">DocExtract</h1>
+                  <h1 className="text-lg font-semibold text-foreground">DocLens</h1>
                   <p className="text-xs text-muted-foreground">AI-Powered Text Extraction</p>
                 </div>
               </div>

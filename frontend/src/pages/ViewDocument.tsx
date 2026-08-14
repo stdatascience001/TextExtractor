@@ -115,10 +115,35 @@ function ViewDocumentContent() {
   // Trigger details refetch on document status changes reported by DocumentStatusService
   useEffect(() => {
     if (liveStatus && id && liveStatus !== documentData?.status) {
+      const oldStatus = documentData?.status;
+      const isExtractedState = [
+        "ready_for_chunking",
+        "chunking_running",
+        "ready_for_embedding",
+        "embedding_running",
+        "embedding_completed",
+        "extraction_running",
+        "extraction_completed",
+        "conflict_running",
+        "conflict_completed",
+        "clarification_running",
+        "clarification_completed",
+        "completed"
+      ].includes(liveStatus);
+      const wasPendingState = !oldStatus || ["uploaded", "ocr_running"].includes(oldStatus);
+
+      if (isExtractedState && wasPendingState) {
+        toast({
+          title: "Text Extracted & Mail Sent!",
+          description: "Your document text has been extracted, and a notification email has been sent to your registered address.",
+          duration: 5000,
+        });
+      }
+
       fetchDocument(id, false);
       fetchMonitorData(id);
     }
-  }, [liveStatus, id, fetchDocument, fetchMonitorData, documentData?.status]);
+  }, [liveStatus, id, fetchDocument, fetchMonitorData, documentData?.status, toast]);
 
   const handleRetry = async () => {
     if (!id) return;
@@ -196,7 +221,7 @@ function ViewDocumentContent() {
           <div className="max-w-[115rem] mx-auto animate-pulse flex h-6 w-32 bg-muted rounded"></div>
         </header>
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <img src="/favicon1.png" alt="Loading..." className="w-10 h-10 animate-spin" />
         </div>
       </div>
     );
