@@ -478,6 +478,9 @@ export function AssistantWorkspace() {
                 suggestedQuestions.push(data.question);
               } else if (data.error) {
                 console.error('LLM stream error:', data.error);
+                if (!fullContent.trim()) {
+                  fullContent = data.error || "I couldn't find this information in the uploaded document.";
+                }
               }
             } catch (e) {
               // Partial line chunk
@@ -485,10 +488,11 @@ export function AssistantWorkspace() {
           }
         }
 
-        // Add assistant message
+        // Add assistant message (ensure content is never an empty blank string)
+        const finalContent = fullContent.trim() || "I couldn't find this information in the uploaded document.";
         const assistantMessage: Message = {
           role: 'assistant',
-          content: fullContent,
+          content: finalContent,
           citations,
           suggestedQuestions,
         };

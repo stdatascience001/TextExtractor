@@ -122,6 +122,19 @@ export const api = {
     return res.json();
   },
 
+  async bulkDeleteDocuments(documentIds: string[]) {
+    const res = await fetchWithTimeout(`${API_URL}/documents/bulk-delete`, {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ document_ids: documentIds }),
+    });
+    if (!res.ok) throw new Error("Failed to delete selected documents");
+    return res.json();
+  },
+
   async getProfile() {
     const res = await fetchWithTimeout(`${API_URL}/auth/profile`, {
       headers: getAuthHeaders(),

@@ -75,37 +75,37 @@ export function TextPanel({ document, currentPage, onPageChange }: TextPanelProp
           */}
 
           <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleCopy}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
-            >
-              <AnimatePresence mode="wait">
-                {copied ? (
-                  <motion.span
-                    key="copied"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="flex items-center gap-1 text-primary"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    Copied
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="copy"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="flex items-center gap-1 text-muted-foreground"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    Copy
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleCopy}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-muted hover:bg-muted/80 transition-colors"
+          >
+            <AnimatePresence mode="wait">
+              {copied ? (
+                <motion.span
+                  key="copied"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="flex items-center gap-1 text-primary"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  Copied
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="copy"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="flex items-center gap-1 text-muted-foreground"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  Copy
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
         </div>
 
         {/* Search (only for raw text) */}
@@ -161,12 +161,12 @@ export function TextPanel({ document, currentPage, onPageChange }: TextPanelProp
       <div className="p-4 bg-muted/30 border-t border-border/50">
         <div className="flex items-center justify-between max-w-sm mx-auto bg-background/80 backdrop-blur-md border border-border/50 rounded-2xl p-1.5 shadow-lg">
           <button
-              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-xl hover:bg-muted disabled:opacity-20 transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="p-2 rounded-xl hover:bg-muted disabled:opacity-20 transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
 
           <div className="flex items-center gap-2 px-4">
             <span className="text-sm font-bold text-primary">{currentPage}</span>
@@ -175,15 +175,14 @@ export function TextPanel({ document, currentPage, onPageChange }: TextPanelProp
           </div>
 
           <button
-              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-xl hover:bg-muted disabled:opacity-20 transition-colors"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+            className="p-2 rounded-xl hover:bg-muted disabled:opacity-20 transition-colors cursor-pointer"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </motion.div>
   );
 }
-

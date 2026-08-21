@@ -9,7 +9,7 @@ from infrastructure.llm.providers.base import ILLMProvider
 from infrastructure.llm.exceptions import LLMException, LLMRateLimitException, LLMTimeoutException
 
 class GroqProvider(ILLMProvider):
-    def __init__(self, api_key: str, default_model: str = "llama-3.3-70b-versatile"):
+    def __init__(self, api_key: str, default_model: str = "openai/gpt-oss-120b"):
         self._api_key = api_key
         self._default_model = default_model
         self._api_url = "https://api.groq.com/openai/v1/chat/completions"
@@ -29,19 +29,21 @@ class GroqProvider(ILLMProvider):
             return self._default_model
         # Direct logical maps or pass-through
         model_map = {
-            "extraction": "llama-3.3-70b-versatile",
-            "reasoning": "deepseek-r1-distill-llama-70b",
-            "summarization": "llama-3.3-70b-versatile",
-            "generation": "llama-3.3-70b-versatile"
+            "extraction": "openai/gpt-oss-120b",
+            "reasoning": "openai/gpt-oss-120b",
+            "summarization": "openai/gpt-oss-120b",
+            "generation": "openai/gpt-oss-120b",
+            "llama-3.3-70b-versatile": "openai/gpt-oss-120b",
+            "deepseek-r1-distill-llama-70b": "openai/gpt-oss-120b"
         }
         return model_map.get(model.lower(), model)
 
     async def generate_text(
-        self, system_prompt: str, user_prompt: str, settings: LLMSettings
+        self, system_prompt: str, user_prompt: str, settings: LLMSettings, model: Optional[str] = None
     ) -> LLMResponse:
-        model = self._resolve_model(None)
+        resolved_model = self._resolve_model(model)
         payload = {
-            "model": model,
+            "model": resolved_model,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -92,9 +94,9 @@ class GroqProvider(ILLMProvider):
         )
 
     async def generate_json(
-        self, system_prompt: str, user_prompt: str, response_model: Type[BaseModel], settings: LLMSettings
+        self, system_prompt: str, user_prompt: str, response_model: Type[BaseModel], settings: LLMSettings, model: Optional[str] = None
     ) -> LLMResponse:
-        model = self._resolve_model(None)
+        resolved_model = self._resolve_model(model)
         
         # Enforce json instruction in prompt and schema extraction
         json_schema = json.dumps(response_model.model_json_schema())
@@ -104,7 +106,7 @@ class GroqProvider(ILLMProvider):
         )
 
         payload = {
-            "model": model,
+            "model": resolved_model,
             "messages": [
                 {"role": "system", "content": modified_system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -123,16 +125,16 @@ class GroqProvider(ILLMProvider):
                     headers=self._get_headers()
                 )
             except httpx.TimeoutException as e:
-                raise LLMTimeoutException(f"Groq API connection timed out: {str(e)}", provider="groq", model=model)
+                raise LLMTimeoutException(f"Groq API connection timed out: {str(e)}", provider="groq", model=resolved_model)
             except Exception as e:
-                raise LLMException(f"Groq API request failed: {str(e)}", provider="groq", model=model)
+                raise LLMException(f"Groq API request failed: {str(e)}", provider="groq", model=resolved_model)
 
         latency = int((time.time() - start_time) * 1000)
 
         if response.status_code == 429:
-            raise LLMRateLimitException("Groq API rate limit reached.", provider="groq", model=model)
+            raise LLMRateLimitException("Groq API rate limit reached.", provider="groq", model=resolved_model)
         elif response.status_code != 200:
-            raise LLMException(f"Groq API returned error status {response.status_code}: {response.text}", provider="groq", model=model)
+            raise LLMException(f"Groq API returned error status {response.status_code}: {response.text}", provider="groq", model=resolved_model)
 
         res_data = response.json()
         content = res_data["choices"][0]["message"]["content"]
@@ -144,11 +146,11 @@ class GroqProvider(ILLMProvider):
             total_tokens=usage_data.get("total_tokens", 0)
         )
 
-        cost = self.estimate_cost(usage.prompt_tokens, usage.completion_tokens, model)
+        cost = self.estimate_cost(usage.prompt_tokens, usage.completion_tokens, resolved_model)
 
         return LLMResponse(
             content=content,
-            model_name=model,
+            model_name=resolved_model,
             provider_name="groq",
             token_usage=usage,
             latency_ms=latency,
@@ -156,11 +158,11 @@ class GroqProvider(ILLMProvider):
         )
 
     async def generate_stream(
-        self, system_prompt: str, user_prompt: str, settings: LLMSettings
+        self, system_prompt: str, user_prompt: str, settings: LLMSettings, model: Optional[str] = None
     ) -> AsyncIterator[LLMResponseChunk]:
-        model = self._resolve_model(None)
+        resolved_model = self._resolve_model(model)
         payload = {
-            "model": model,
+            "model": resolved_model,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}

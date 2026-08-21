@@ -7,8 +7,9 @@ import { DocumentViewer } from "@/components/DocumentViewer";
 import { TextPanel } from "@/components/TextPanel";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { EmptyState } from "@/components/EmptyState";
+import { HowItWorksModal } from "@/components/HowItWorksModal";
 import { uploadDocument, type ExtractedDocument } from "@/lib/mockApi";
-import { Sparkles, Save, Loader2, LogOut, User as UserIcon } from "lucide-react";
+import { Sparkles, Save, Loader2, LogOut, User as UserIcon, HelpCircle } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogoutButton } from "@/components/LogoutButton";
@@ -25,6 +26,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
   const { user, isAuthenticated, setPendingDocument, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -173,7 +175,20 @@ const Index = () => {
         )}
 
         {/* Main content */}
-        <main className="max-w-[115rem] mx-auto px-6 py-8">
+        <main className="max-w-[115rem] mx-auto px-6 py-4 sm:py-6 relative">
+          {/* Top Right "How It Works" Trigger Button */}
+          <div className="flex justify-end mb-2">
+            <motion.button
+              whileHover={{ scale: 1.03, y: -1 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowHowItWorks(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card/80 backdrop-blur-md border border-border/80 hover:border-primary/50 hover:bg-primary/5 text-foreground text-xs sm:text-sm font-medium shadow-sm hover:shadow transition-all group cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-primary group-hover:rotate-12 transition-transform" />
+              <span>How It Works</span>
+            </motion.button>
+          </div>
+
           <AnimatePresence mode="wait">
             {!document ? (
               <motion.div
@@ -300,6 +315,9 @@ const Index = () => {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Interactive Guide Popup Modal */}
+      <HowItWorksModal open={showHowItWorks} onOpenChange={setShowHowItWorks} />
     </SidebarLayout>
   );
 };

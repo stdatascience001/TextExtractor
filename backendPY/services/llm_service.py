@@ -18,7 +18,8 @@ logger = logging.getLogger("llm_service")
 
 # 1. Cost Registry Rates (per 1,000,000 tokens)
 MODEL_RATES = {
-    # Groq Llama
+    # Groq
+    "openai/gpt-oss-120b": {"input": 0.59, "output": 0.79},
     "llama-3.3-70b-versatile": {"input": 0.59, "output": 0.79},
     # OpenAI Mini
     "gpt-4o-mini": {"input": 0.15, "output": 0.60},
@@ -40,12 +41,12 @@ def calculate_cost(model_name: str, prompt_tokens: int, completion_tokens: int) 
 MODEL_REGISTRY = {
     "extraction-fast": {
         "provider": "groq",
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b",
         "fallback": "openai:gpt-4o-mini"
     },
     "reasoning-heavy": {
         "provider": "groq",
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b",
         "fallback": "claude:claude-3-5-sonnet"
     },
     "synthesis-large": {

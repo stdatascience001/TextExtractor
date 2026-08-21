@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, BackgroundTasks
 from fastapi.responses import PlainTextResponse, JSONResponse, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, or_, and_, desc, asc
+from sqlalchemy import select, func, or_, and_, desc, asc, delete
 from sqlalchemy.orm import selectinload
 from typing import Optional
 from datetime import datetime
@@ -14,7 +14,7 @@ from core.config import settings
 
 from database.database import get_db
 from models.models import User, Document, DocumentResult, Project, ProjectMember
-from schemas.document import SaveDocumentRequest, DocumentResponse, DocumentResultResponse, DocumentListResponse
+from schemas.document import SaveDocumentRequest, DocumentResponse, DocumentResultResponse, DocumentListResponse, BulkDeleteDocumentsRequest
 from auth.dependencies import get_current_user
 from core.exceptions import APIException
 from core.logging import logger
@@ -293,6 +293,57 @@ async def delete_document(
                 logger.warning(f"Failed to delete physical file {physical_path}: {str(e)}")
 
     return {"status": "ok", "message": "Document deleted successfully"}
+ 
+@router.post("/bulk-delete")
+async def bulk_delete_documents(
+    request: BulkDeleteDocumentsRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if not request.document_ids:
+        return {"status": "ok", "deleted_count": 0, "message": "No documents specified"}
+
+    # Fetch all matching documents owned by the user
+    stmt = select(Document).where(
+        Document.id.in_(request.document_ids),
+        Document.user_id == current_user.id
+    )
+    result = await db.execute(stmt)
+    docs = result.scalars().all()
+
+    if not docs:
+        return {"status": "ok", "deleted_count": 0, "message": "No matching documents found"}
+
+    deleted_count = len(docs)
+    doc_ids = [d.id for d in docs]
+
+    # Explicitly clean up associated results
+    await db.execute(
+        delete(DocumentResult).where(DocumentResult.document_id.in_(doc_ids))
+    )
+
+    # Physically delete the files
+    for doc in docs:
+        if doc.file_path and doc.file_path.startswith("/files/"):
+            filename = doc.file_path.replace("/files/", "")
+            physical_path = os.path.join(settings.UPLOAD_DIR, filename)
+            if os.path.exists(physical_path):
+                try:
+                    os.remove(physical_path)
+                    logger.info(f"Deleted physical file: {physical_path}")
+                except Exception as e:
+                    logger.warning(f"Failed to delete physical file {physical_path}: {str(e)}")
+
+        await db.delete(doc)
+
+    await db.commit()
+    logger.info(f"Bulk deleted {deleted_count} documents for user {current_user.id}")
+
+    return {
+        "status": "ok",
+        "deleted_count": deleted_count,
+        "message": f"Successfully deleted {deleted_count} document(s)"
+    }
 
 @router.get("/{document_id}/export")
 async def export_document(

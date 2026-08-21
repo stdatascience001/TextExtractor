@@ -33,3 +33,6 @@ class DocumentListResponse(BaseModel):
     total: int
     skip: int
     limit: int
+
+class BulkDeleteDocumentsRequest(BaseModel):
+    document_ids: List[uuid.UUID]
